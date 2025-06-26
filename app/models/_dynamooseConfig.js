@@ -5,7 +5,7 @@ const ddb = new dynamoose.aws.ddb.DynamoDB({
     accessKeyId: process.env.PRIVATE_AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.PRIVATE_AWS_SECRET_ACCESS_KEY
   },
-  region: PRIVATE_AWS_REGION
+  region: process.env.PRIVATE_AWS_REGION
 })
 
 dynamoose.aws.ddb.set(ddb)
