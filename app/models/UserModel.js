@@ -4,11 +4,23 @@ import { TableName } from './_dynamooseConfig'
 const UserSchema = new dynamoose.Schema({
   pk: {
     type: String,
-    hashKey: true
+    hashKey: true,
   },
+  sk: {
+    type: String,
+    rangeKey: true
+  },
+  GSI1PK: {
+    type: String,
+    index: {
+      name: 'nameIndex',
+      type: 'global',
+      rangeKey: 'GS1SK'
+    }
+  },
+  GS1SK: String,
   email: String,
-  name: String,
-  isAdmin: Boolean
+  name: String
 })
 
 const UserModel = dynamoose.model("User", UserSchema)
