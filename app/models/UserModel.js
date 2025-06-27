@@ -18,7 +18,7 @@ const UserSchema = new dynamoose.Schema({
       rangeKey: 'GS1SK'
     }
   },
-  GS1SK: String,
+  GSI1SK: String,
   email: String,
   name: String
 })
