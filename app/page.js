@@ -35,7 +35,7 @@ export default function App() {
 
     let newUsername = ""
     while (newUsername === "") {
-      newUsername = prompt(`Email：${newEmail}\n请输入用户名：`)
+      newUsername = prompt(`Email：${newEmail}\n请输入角色名：`)
       if (newUsername === null) return
       newUsername = newUsername.trim()
     }
@@ -53,28 +53,53 @@ export default function App() {
       const newUser = (await res.json()).data
       setUsers(users => [...users, newUser])
     } else {
-      alert("创建用户失败")
+      alert("创建角色失败")
     }
     setDisabled(false)
+  }
+
+  const updateUser = async (email) => {
+
+  }
+
+  const deleteUser = async (email) => {
+
   }
 
   if (hasError) return <div>出错了，刷新一下吧</div>
 
   return (
     <>
-      <h1>全部用户</h1>
+      <h1>全部角色</h1>
 
       <nav>
-        <button type="button" onClick={createNewUser} disabled={disabled}>新建用户</button>
+        <button type="button" onClick={createNewUser} disabled={disabled}>新建角色</button>
         <label>
           <input type="checkbox" checked={isDesc} onChange={() => setIsDesc(!isDesc)} disabled={disabled} />
           降序排列
         </label>
       </nav>
 
-      {users && users.length && users.map((user) =>
-        <div key={user.pk}>{user.name} ({user.email})</div>
-      )}
+      <table>
+        <thead>
+          <tr>
+            <th>角色名</th>
+            <th>Email</th>
+            <th>改名</th>
+            <th>删除</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users && users.length && users.map((user) =>
+            <tr key={user.pk}>
+              <td>{user.name}</td>
+              <td>{user.email}</td>
+              <td><button type="button" onClick={() => updateUser(user.email)}>改名</button></td>
+              <td><button type="button" onClick={() => deleteUser(user.email)}>删除</button></td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </>
   )
 }
