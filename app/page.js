@@ -63,7 +63,20 @@ export default function App() {
   }
 
   const deleteUser = async (email) => {
+    if (!confirm(`删除 Email ${email} 所对应的角色？`)) return
 
+    setDisabled(true)
+    const res = await fetch("/api/users", {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email })
+    })
+    if (res.ok) {
+      setUsers(users.filter(user => user.pk !== `EMAIL#${email}`))
+    } else {
+      alert("删除角色失败")
+    }
+    setDisabled(false)
   }
 
   if (hasError) return <div>出错了，刷新一下吧</div>

@@ -6,7 +6,7 @@ export async function GET(request) {
   const sort = url.searchParams.get('sort') || 'ascending'
 
   try {
-    let res = await UserModel.query().where('GSI1PK').eq('USER').using('nameIndex').sort(sort).exec()
+    const res = await UserModel.query().where('GSI1PK').eq('USER').using('nameIndex').sort(sort).exec()
     // console.log(res)
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
@@ -30,7 +30,7 @@ export async function POST(request) {
   }
 
   try {
-    let res = await UserModel.create({
+    const res = await UserModel.create({
       pk: `EMAIL#${email}`,
       sk: `EMAIL#${email}`,
       GSI1PK: "USER",
@@ -49,6 +49,10 @@ export async function POST(request) {
   }
 }
 
+export async function PATCH(request) {
+
+}
+
 export async function DELETE(request) {
   let data
   try {
@@ -61,20 +65,23 @@ export async function DELETE(request) {
   if (!emailValidate(email)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
+  const pk = `EMAIL#${email}`
 
   try {
-    let res = await UserModel.delete({
-      pk: `EMAIL#${email}`,
-      sk: `EMAIL#${email}`
-    })
-    console.log(res)
+    const res_pk = await UserModel.query().where('pk').eq(pk).exec()
+    const pksks = res_pk.map(i => ({
+      pk: pk,
+      sk: i.sk
+    }))
+    if (!(pksks && pksks.length)) {
+      return Response.json({ error: "User not found" }, { status: 404 })
+    }
+
+    const res = await UserModel.batchDelete(pksks)
+    // console.log(res)
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
     console.log(err)
-    if (err.name === 'ConditionalCheckFailedException') {
-      return Response.json({ error: err.toString() }, { status: 412 })
-    }
     return Response.json({ error: err.toString() }, { status: 500 })
   }
 }
-
