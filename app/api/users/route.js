@@ -48,3 +48,33 @@ export async function POST(request) {
     return Response.json({ error: err.toString() }, { status: 500 })
   }
 }
+
+export async function DELETE(request) {
+  let data
+  try {
+    data = await request.json()
+  } catch {
+    return Response.json({ error: "Bad request" }, { status: 400 })
+  }
+
+  const email = String(data.email) || ""
+  if (!emailValidate(email)) {
+    return Response.json({ error: "Bad request" }, { status: 400 })
+  }
+
+  try {
+    let res = await UserModel.delete({
+      pk: `EMAIL#${email}`,
+      sk: `EMAIL#${email}`
+    })
+    console.log(res)
+    return Response.json({ data: res }, { status: 200 })
+  } catch (err) {
+    console.log(err)
+    if (err.name === 'ConditionalCheckFailedException') {
+      return Response.json({ error: err.toString() }, { status: 412 })
+    }
+    return Response.json({ error: err.toString() }, { status: 500 })
+  }
+}
+
