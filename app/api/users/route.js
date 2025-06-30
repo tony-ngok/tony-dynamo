@@ -4,6 +4,9 @@ import { emailValidate } from "@/app/utils"
 export async function GET(request) {
   const url = new URL(request.url)
   const sort = url.searchParams.get('sort') || 'ascending'
+  if (sort !== 'ascending' && sort !== 'descending') {
+    return Response.json({ error: "Bad request" }, { status: 400 })
+  }
 
   try {
     const res = await UserModel.query().where('GSI1PK').eq('USER').using('nameIndex').sort(sort).exec()
@@ -23,8 +26,8 @@ export async function POST(request) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
-  const email = String(data.email) || ""
-  const name = String(data.name) || ""
+  const email = String(data.email).trim() || ""
+  const name = String(data.name).trim() || ""
   if (!(emailValidate(email) && name)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
@@ -57,8 +60,8 @@ export async function PATCH(request) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
-  const email = String(data.email) || ""
-  const name = String(data.name) || ""
+  const email = String(data.email).trim() || ""
+  const name = String(data.name).trim() || ""
   if (!(emailValidate(email) && name)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
@@ -66,7 +69,7 @@ export async function PATCH(request) {
 
   try {
     const res = await UserModel.update({ pk: pk, sk: pk }, { GSI1SK: `NAME#${name}`, name: name })
-    console.log(res)
+    // console.log(res)
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
     console.log(err)
@@ -82,7 +85,7 @@ export async function DELETE(request) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
-  const email = String(data.email) || ""
+  const email = String(data.email).trim() || ""
   if (!emailValidate(email)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
