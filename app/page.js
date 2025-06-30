@@ -45,10 +45,7 @@ export default function App() {
     const res = await fetch("/api/users", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: newEmail,
-        name: newUsername
-      })
+      body: JSON.stringify({ email: newEmail, name: newUsername })
     })
     if (res.ok) {
       const newUser = (await res.json()).data
@@ -59,8 +56,29 @@ export default function App() {
     setDisabled(false)
   }
 
-  const updateUser = async (email) => {
-    // 待完成：修改用户名
+  const updateUser = async (email, actualName) => {
+    let newUsername = ""
+    while (newUsername === "" || newUsername === actualName) {
+      newUsername = prompt(`Email：${email}\n请输入新角色名：`, actualName)
+      if (newUsername === null) return
+      newUsername = newUsername.trim()
+    }
+
+    setDisabled(true)
+    const res = await fetch("/api/users", {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, name: newUsername })
+    })
+    if (res.ok) {
+      const newUser = (await res.json()).data
+      setUsers(prevs =>
+        prevs.map(prev => (prev.pk === newUser.pk ? newUser : prev))
+      )
+    } else {
+      alert("改名失败")
+    }
+    setDisabled(false)
   }
 
   const deleteUser = async (email) => {
@@ -108,7 +126,7 @@ export default function App() {
             <tr key={user.pk}>
               <td><Link href={`/${encodeURIComponent(user.email)}`}>{user.name}</Link></td>
               <td><Link href={`/${encodeURIComponent(user.email)}`}>{user.email}</Link></td>
-              <td><button type="button" onClick={() => updateUser(user.email)}>改名</button></td>
+              <td><button type="button" onClick={() => updateUser(user.email, user.name)}>改名</button></td>
               <td><button type="button" onClick={() => deleteUser(user.email)}>删除</button></td>
             </tr>
           )}

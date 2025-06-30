@@ -50,7 +50,28 @@ export async function POST(request) {
 }
 
 export async function PATCH(request) {
-  // 待完成：修改用户名
+  let data
+  try {
+    data = await request.json()
+  } catch {
+    return Response.json({ error: "Bad request" }, { status: 400 })
+  }
+
+  const email = String(data.email) || ""
+  const name = String(data.name) || ""
+  if (!(emailValidate(email) && name)) {
+    return Response.json({ error: "Bad request" }, { status: 400 })
+  }
+  const pk = `EMAIL#${email}`
+
+  try {
+    const res = await UserModel.update({ pk: pk, sk: pk }, { GSI1SK: `NAME#${name}`, name: name })
+    console.log(res)
+    return Response.json({ data: res }, { status: 200 })
+  } catch (err) {
+    console.log(err)
+    return Response.json({ error: err.toString() }, { status: 500 })
+  }
 }
 
 export async function DELETE(request) {
