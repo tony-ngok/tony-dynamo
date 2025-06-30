@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { emailValidate } from "./utils"
+import Link from "next/link"
 
 export default function App() {
   const [disabled, setDisabled] = useState(true)
@@ -59,7 +60,7 @@ export default function App() {
   }
 
   const updateUser = async (email) => {
-
+    // 待完成：修改用户名
   }
 
   const deleteUser = async (email) => {
@@ -105,8 +106,8 @@ export default function App() {
         <tbody>
           {users && users.length && users.map((user) =>
             <tr key={user.pk}>
-              <td>{user.name}</td>
-              <td>{user.email}</td>
+              <td><Link href={`/${encodeURIComponent(user.email)}`}>{user.name}</Link></td>
+              <td><Link href={`/${encodeURIComponent(user.email)}`}>{user.email}</Link></td>
               <td><button type="button" onClick={() => updateUser(user.email)}>改名</button></td>
               <td><button type="button" onClick={() => deleteUser(user.email)}>删除</button></td>
             </tr>

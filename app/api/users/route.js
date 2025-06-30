@@ -50,7 +50,7 @@ export async function POST(request) {
 }
 
 export async function PATCH(request) {
-
+  // 待完成：修改用户名
 }
 
 export async function DELETE(request) {
