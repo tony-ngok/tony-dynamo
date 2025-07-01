@@ -70,26 +70,29 @@ export default function DiaryView({ pk }) {
 
       <h2>日记列表</h2>
       <nav>
-        {/* <button type="button" onClick={createNewUser} disabled={disabled}>写日记</button> */}
-        <label>
-          <input type="checkbox" checked={isDesc} onChange={() => setIsDesc(!isDesc)} disabled={disabled} />
-          降序排列
-        </label>
+        <Link href={`/${pk}/new`}>写日记</Link>
+        {diarys && Boolean(diarys.length) &&
+          <label>
+            <input type="checkbox" checked={isDesc} onChange={() => setIsDesc(!isDesc)} disabled={disabled} />
+            降序排列
+          </label>
+        }
       </nav>
 
+      <div>点击一个标题以查看日记：</div>
       <table>
         <thead>
           <tr>
             <th>标题</th>
-            <th>改名</th>
+            <th>修改</th>
             <th>删除</th>
           </tr>
         </thead>
         <tbody>
           {diarys && Boolean(diarys.length) && diarys.map((diary) =>
             <tr key={diary.sk.split('#')[1]}>
-              <td><Link href={`/${pk}/${diary.sk.split('#')[1]}`}>{diary.title}</Link></td>
-              <td><button type="button" onClick={() => updateUser(diary.email, diary.name)}>改名</button></td>
+              <td><Link href="">{diary.title}</Link></td>
+              <td><Link href={`/${pk}/${diary.sk.split('#')[1]}/edit`}>修改</Link></td>
               <td><button type="button" onClick={() => deleteUser(diary.email)}>删除</button></td>
             </tr>
           )}
