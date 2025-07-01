@@ -65,7 +65,7 @@ export async function PATCH(request) {
   if (!(emailValidate(email) && name)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
-  const pk = `EMAIL#${email}`
+  const pk = `USER#EMAIL#${email}`
 
   try {
     const res = await UserModel.update({ pk: pk, sk: pk }, { GSI1SK: `NAME#${name}`, name: name })

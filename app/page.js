@@ -90,7 +90,7 @@ export default function App() {
       body: JSON.stringify({ email: email })
     })
     if (res.ok) {
-      setUsers(users.filter(user => user.pk !== `EMAIL#${email}`))
+      setUsers(users.filter(user => user.pk !== `USER#EMAIL#${email}`))
     } else {
       alert("删除角色失败")
     }
