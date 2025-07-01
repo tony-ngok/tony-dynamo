@@ -1,5 +1,5 @@
 import UserModel from "@/app/models/UserModel"
-import { emailValidate } from "@/app/utils"
+import { apiString, emailValidate } from "@/app/utils"
 
 export async function GET(request) {
   const url = new URL(request.url)
@@ -26,8 +26,8 @@ export async function POST(request) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
-  const email = String(data.email).trim() || ""
-  const name = String(data.name).trim() || ""
+  const email = apiString(data.email)
+  const name = apiString(data.name)
   if (!(emailValidate(email) && name)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
@@ -60,8 +60,8 @@ export async function PATCH(request) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
-  const email = String(data.email).trim() || ""
-  const name = String(data.name).trim() || ""
+  const email = apiString(data.email)
+  const name = apiString(data.name)
   if (!(emailValidate(email) && name)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
@@ -72,7 +72,7 @@ export async function PATCH(request) {
     // console.log(res)
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
-    console.log(err)
+    // console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
   }
 }
@@ -85,11 +85,11 @@ export async function DELETE(request) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
-  const email = String(data.email).trim() || ""
+  const email = apiString(data.email)
   if (!emailValidate(email)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
-  const pk = `EMAIL#${email}`
+  const pk = `USER#EMAIL#${email}`
 
   try {
     const res_pk = await UserModel.query().where('pk').eq(pk).exec()
@@ -97,6 +97,7 @@ export async function DELETE(request) {
       pk: pk,
       sk: i.sk
     }))
+    // console.log(pksks)
     if (!(pksks && pksks.length)) {
       return Response.json({ error: "User not found" }, { status: 404 })
     }
