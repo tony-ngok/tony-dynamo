@@ -11,9 +11,8 @@ export default function App() {
   const [isDesc, setIsDesc] = useState(false)
 
   useEffect(() => {
-    const sort = isDesc ? 'descending' : 'ascending'
-
     async function getUsers() {
+      const sort = isDesc ? 'descending' : 'ascending'
       const res = await fetch(`/api/users?sort=${sort}`)
       if (res.ok) {
         setUsers((await res.json()).data)
@@ -122,7 +121,7 @@ export default function App() {
           </tr>
         </thead>
         <tbody>
-          {users && users.length && users.map((user) =>
+          {users && Boolean(users.length) && users.map((user) =>
             <tr key={user.pk}>
               <td><Link href={`/${encodeURIComponent(user.email)}`}>{user.name}</Link></td>
               <td><Link href={`/${encodeURIComponent(user.email)}`}>{user.email}</Link></td>
