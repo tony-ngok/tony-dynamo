@@ -4,7 +4,7 @@ import { TableName } from './_dynamooseConfig'
 const UserSchema = new dynamoose.Schema({
   pk: {
     type: String,
-    hashKey: true,
+    hashKey: true
   },
   sk: {
     type: String,

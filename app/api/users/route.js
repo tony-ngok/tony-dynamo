@@ -34,8 +34,8 @@ export async function POST(request) {
 
   try {
     const res = await UserModel.create({
-      pk: `EMAIL#${email}`,
-      sk: `EMAIL#${email}`,
+      pk: `USER#EMAIL#${email}`,
+      sk: `USER#EMAIL#${email}`,
       GSI1PK: "USER",
       GSI1SK: `NAME#${name}`,
       email: email,

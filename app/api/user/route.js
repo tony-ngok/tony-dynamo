@@ -7,7 +7,7 @@ export async function GET(request) {
   if (!emailValidate(email)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
-  const pk = `EMAIL#${email}`
+  const pk = `USER#EMAIL#${email}`
 
   try {
     const res = await UserModel.get({ pk: pk, sk: pk })
