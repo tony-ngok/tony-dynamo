@@ -62,7 +62,6 @@ export default function DiaryView({ pk }) {
 
   if (userPk === undefined) return <div>载入中...</div>
 
-  // 待完成：列出日记
   return (
     <>
       <div>当前角色：<strong>{userPk.name}（{decodeURIComponent(pk)}）</strong></div>
