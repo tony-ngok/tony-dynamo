@@ -49,7 +49,37 @@ export async function POST(request) {
     // console.log(res)
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
-    console.log(err)
+    // console.log(err)
+    return Response.json({ error: err.toString() }, { status: 500 })
+  }
+}
+
+export async function PATCH(request) {
+  let data
+  try {
+    data = await request.json()
+  } catch {
+    return Response.json({ error: "Bad request" }, { status: 400 })
+  }
+
+  const email = apiString(data.email)
+  const id = apiString(data.id)
+  const title = apiString(data.title)
+  const content = apiString(data.content)
+  if (!(emailValidate(email) && id && title && content)) {
+    return Response.json({ error: "Bad request" }, { status: 400 })
+  }
+  const pk = `USER#EMAIL#${email}`
+  const sk = `DIARY#${id}`
+
+  try {
+    const res = await DiaryModel.update({ pk: pk, sk: sk }, {
+      content: content, title: title, GSI1SK: `DIARY#TITLE#${title}`
+    })
+    // console.log(res)
+    return Response.json({ data: res }, { status: 200 })
+  } catch (err) {
+    // console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
   }
 }
@@ -74,7 +104,7 @@ export async function DELETE(request) {
     await DiaryModel.delete({ pk: pk, sk: sk })
     return Response.json({ message: "Delete complete" }, { status: 200 })
   } catch (err) {
-    console.log(err)
+    // console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
   }
 }

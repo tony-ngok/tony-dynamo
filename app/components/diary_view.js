@@ -92,7 +92,7 @@ export default function DiaryView({ pk }) {
         {diarys && Boolean(diarys.length) &&
           <label>
             <input type="checkbox" checked={isDesc} onChange={() => setIsDesc(!isDesc)} disabled={disabled} />
-            降序排列
+            标题降序排列
           </label>
         }
       </nav>

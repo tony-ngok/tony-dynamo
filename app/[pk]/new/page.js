@@ -49,7 +49,11 @@ export default function NewDiary() {
 
         <div>
           <label>内容</label>
-          <textarea onChange={(e) => setContent(e.target.value)} disabled={disabled} required />
+          <textarea onChange={(e) => setContent(e.target.value)}
+            disabled={disabled}
+            style={{ width: "400px", height: "200px" }}
+            required
+          />
         </div>
 
         <button type="submit" disabled={disabled}>提交</button>

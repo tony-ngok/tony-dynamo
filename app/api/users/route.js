@@ -106,7 +106,7 @@ export async function DELETE(request) {
     // console.log(res)
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
-    console.log(err)
+    // console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
   }
 }
