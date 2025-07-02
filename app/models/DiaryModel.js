@@ -23,6 +23,6 @@ const DiarySchema = new dynamoose.Schema({
   content: String
 })
 
-const DiaryModel = dynamoose.model("User", DiarySchema)
+const DiaryModel = dynamoose.model("Diary", DiarySchema)
 const _ = new dynamoose.Table(TableName, [DiaryModel])
 export default DiaryModel

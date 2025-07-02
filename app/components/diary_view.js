@@ -9,6 +9,7 @@ export default function DiaryView({ pk }) {
   const [userPk, setUserPk] = useState(undefined)
   const [diarys, setDiarys] = useState(undefined)
   const [isDesc, setIsDesc] = useState(false)
+  const [actual, setActual] = useState(null)
 
   useEffect(() => {
     async function getUser() {
@@ -41,6 +42,24 @@ export default function DiaryView({ pk }) {
       getDiarys()
     }
   }, [userPk, isDesc])
+
+  const deleteDiary = async (diary) => {
+    if (!confirm(`删除日记：${diary.title}？`)) return
+
+    setDisabled(true)
+    const res = await fetch("/api/diarys", {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: decodeURIComponent(pk), id: diary.sk.split('#')[1] })
+    })
+    if (res.ok) {
+      if (actual.sk === diary.sk) { setActual(null) }
+      setDiarys(diarys.filter(d => d.sk !== diary.sk))
+    } else {
+      alert("删除角色失败")
+    }
+    setDisabled(false)
+  }
 
   if (hasError) {
     return (
@@ -90,13 +109,28 @@ export default function DiaryView({ pk }) {
         <tbody>
           {diarys && Boolean(diarys.length) && diarys.map((diary) =>
             <tr key={diary.sk.split('#')[1]}>
-              <td><Link href="">{diary.title}</Link></td>
+              <td>
+                <Link href=""
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setActual(diary)
+                  }}>
+                  {diary.title}
+                </Link>
+              </td>
               <td><Link href={`/${pk}/${diary.sk.split('#')[1]}/edit`}>修改</Link></td>
-              <td><button type="button" onClick={() => deleteUser(diary.email)}>删除</button></td>
+              <td><button type="button" onClick={() => deleteDiary(diary)}>删除</button></td>
             </tr>
           )}
         </tbody>
       </table>
+
+      {actual &&
+        <>
+          <h3>{actual.title}</h3>
+          <textarea value={actual.content} style={{ width: "400px", height: "200px" }} readOnly />
+        </>
+      }
     </>
   )
 }

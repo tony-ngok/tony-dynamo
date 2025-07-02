@@ -46,8 +46,33 @@ export async function POST(request) {
       title: title,
       content: content
     })
-    console.log(res)
+    // console.log(res)
     return Response.json({ data: res }, { status: 200 })
+  } catch (err) {
+    console.log(err)
+    return Response.json({ error: err.toString() }, { status: 500 })
+  }
+}
+
+export async function DELETE(request) {
+  let data
+  try {
+    data = await request.json()
+  } catch {
+    return Response.json({ error: "Bad request" }, { status: 400 })
+  }
+
+  const email = apiString(data.email)
+  const id = apiString(data.id)
+  if (!(emailValidate(email) && id)) {
+    return Response.json({ error: "Bad request" }, { status: 400 })
+  }
+  const pk = `USER#EMAIL#${email}`
+  const sk = `DIARY#${id}`
+
+  try {
+    await DiaryModel.delete({ pk: pk, sk: sk })
+    return Response.json({ message: "Delete complete" }, { status: 200 })
   } catch (err) {
     console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
