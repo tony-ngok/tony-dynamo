@@ -50,7 +50,7 @@ export default function DiaryView({ pk }) {
     const res = await fetch("/api/diarys", {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: decodeURIComponent(pk), id: diary.sk.split('#')[1] })
+      body: JSON.stringify({ id: diary.sk.split('#')[1] })
     })
     if (res.ok) {
       if (actual.sk === diary.sk) { setActual(null) }

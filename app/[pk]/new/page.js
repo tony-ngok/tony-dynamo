@@ -23,7 +23,7 @@ export default function NewDiary() {
     const res = await fetch('/api/diarys', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: decodeURIComponent(pk), title: title, content: content })
+      body: JSON.stringify({ title: title, content: content })
     })
     if (res.ok) {
       redirect(`/${pk}`)

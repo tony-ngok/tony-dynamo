@@ -37,7 +37,7 @@ export default function DiaryEdit({ pk, id }) {
     const res = await fetch('/api/diarys', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: decodeURIComponent(pk), id: id, title: title, content: content })
+      body: JSON.stringify({ id: id, title: title, content: content })
     })
     if (res.ok) {
       redirect(`/${pk}`)

@@ -38,9 +38,10 @@ export async function POST(request) {
   }
 
   try {
+    const id = uuid.v4()
     const res = await DiaryModel.create({
-      pk: `USER#EMAIL#${email}`,
-      sk: `DIARY#${uuid.v4()}`,
+      pk: `DIARY#${id}`,
+      sk: `DIARY#${id}`,
       GSI1PK: `AUTOR#EMAIL#${email}`,
       GSI1SK: `DIARY#TITLE#${title}`,
       title: title,
@@ -62,18 +63,16 @@ export async function PATCH(request) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
-  const email = apiString(data.email)
   const id = apiString(data.id)
   const title = apiString(data.title)
   const content = apiString(data.content)
-  if (!(emailValidate(email) && id && title && content)) {
+  if (!(id && title && content)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
-  const pk = `USER#EMAIL#${email}`
-  const sk = `DIARY#${id}`
+  const pk = `DIARY#${id}`
 
   try {
-    const res = await DiaryModel.update({ pk: pk, sk: sk }, {
+    const res = await DiaryModel.update({ pk: pk, sk: pk }, {
       content: content, title: title, GSI1SK: `DIARY#TITLE#${title}`
     })
     // console.log(res)
@@ -92,16 +91,14 @@ export async function DELETE(request) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
-  const email = apiString(data.email)
   const id = apiString(data.id)
-  if (!(emailValidate(email) && id)) {
+  if (!id) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
-  const pk = `USER#EMAIL#${email}`
-  const sk = `DIARY#${id}`
+  const pk = `DIARY#${id}`
 
   try {
-    await DiaryModel.delete({ pk: pk, sk: sk })
+    await DiaryModel.delete({ pk: pk, sk: pk })
     return Response.json({ message: "Delete complete" }, { status: 200 })
   } catch (err) {
     // console.log(err)

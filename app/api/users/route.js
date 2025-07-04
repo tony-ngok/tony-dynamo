@@ -1,4 +1,5 @@
 import UserModel from "@/app/models/UserModel"
+import DiaryModel from "@/app/models/DiaryModel"
 import { apiString, emailValidate } from "@/app/utils"
 
 export async function GET(request) {
@@ -89,22 +90,23 @@ export async function DELETE(request) {
   if (!emailValidate(email)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
-  const pk = `USER#EMAIL#${email}`
 
   try {
-    const res_pk = await UserModel.query().where('pk').eq(pk).exec()
-    const pksks = res_pk.map(i => ({
-      pk: pk,
-      sk: i.sk
-    }))
-    // console.log(pksks)
-    if (!(pksks && pksks.length)) {
-      return Response.json({ error: "User not found" }, { status: 404 })
+    const res_pk = await DiaryModel.query().where('GSI1PK').eq(`AUTOR#EMAIL#${email}`).exec()
+    // console.log(res_pk)
+    if (res_pk.count) {
+      const pksks = res_pk.map(i => ({
+        pk: i.pk,
+        sk: i.sk
+      }))
+      // console.log(pksks)
+      await DiaryModel.batchDelete(pksks)
     }
 
-    const res = await UserModel.batchDelete(pksks)
-    // console.log(res)
-    return Response.json({ data: res }, { status: 200 })
+    const pk = `USER#EMAIL#${email}`
+    await UserModel.delete({ pk: pk, sk: pk })
+
+    return Response.json({ message: "Delete complete" }, { status: 200 })
   } catch (err) {
     // console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
