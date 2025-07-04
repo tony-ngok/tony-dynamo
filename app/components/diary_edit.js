@@ -13,7 +13,7 @@ export default function DiaryEdit({ pk, id }) {
   const [preContent, setPreContent] = useState("")
 
   useEffect(() => {
-    async function getDiary () {
+    async function getDiary() {
       const res_diary = await fetch(`/api/diary?email=${pk}&id=${id}`)
       if (res_diary.ok) {
         const res_data = (await res_diary.json()).data
