@@ -14,7 +14,7 @@ export default function DiaryEdit({ pk, id }) {
 
   useEffect(() => {
     async function getDiary() {
-      const res_diary = await fetch(`/api/diary?email=${pk}&id=${id}`)
+      const res_diary = await fetch(`/api/diary?id=${id}`)
       if (res_diary.ok) {
         const res_data = (await res_diary.json()).data
         setTitle(res_data.title)

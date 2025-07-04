@@ -3,16 +3,14 @@ import { emailValidate } from "@/app/utils"
 
 export async function GET(request) {
   const url = new URL(request.url)
-  const email = url.searchParams.get('email') || ""
   const id = url.searchParams.get('id') || ""
-  if (!(emailValidate(email) && id)) {
+  if (!id) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
-  const pk = `USER#EMAIL#${email}`
-  const sk = `DIARY#${id}`
+  const pk = `DIARY#${id}`
 
   try {
-    const res = await DiaryModel.get({ pk: pk, sk: sk })
+    const res = await DiaryModel.get({ pk: pk, sk: pk })
     if (!res) {
       return Response.json({ error: "Diary not found for this user" }, { status: 404 })
     }
