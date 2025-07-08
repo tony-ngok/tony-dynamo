@@ -40,11 +40,15 @@ export async function POST(request) {
   }
 
   try {
+    const dir = apiString(data.dir)
+    let gsi1pk = `AUTOR#EMAIL#${email}`
+    if (dir) gsi1pk += `#DIR#${dir}`
+
     const id = uuid.v4()
     const res = await DiaryModel.create({
       pk: `DIARY#${id}`,
       sk: `DIARY#${id}`,
-      GSI1PK: `AUTOR#EMAIL#${email}`,
+      GSI1PK: gsi1pk,
       GSI1SK: `DIARY#TITLE#${title}`,
       title: title,
       content: content

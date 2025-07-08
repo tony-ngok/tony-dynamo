@@ -67,7 +67,7 @@ export default function DiaryView({ pk, dirId }) {
       body: JSON.stringify({ id: diary.sk.split('#')[1] })
     })
     if (res.ok) {
-      if (actual.sk === diary.sk) { setActual(null) }
+      if (actual && (actual.sk === diary.sk)) { setActual(null) }
       setDiarys(diarys.filter(d => d.sk !== diary.sk))
     } else {
       alert("删除日记失败")
@@ -130,10 +130,10 @@ export default function DiaryView({ pk, dirId }) {
     const res = await fetch("/api/dirs", {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: dir.pk.split('#')[1] })
+      body: JSON.stringify({ email: decodeURIComponent(pk), id: dir.pk.split('#')[1] })
     })
     if (res.ok) {
-      setDiarys(diarys.filter(d => d.pk !== dir.pk))
+      setDirs(dirs.filter(d => d.pk !== dir.pk))
     } else {
       alert("删除收藏失败")
     }
@@ -166,9 +166,11 @@ export default function DiaryView({ pk, dirId }) {
       <Link href="/">返回首页</Link>
 
       <h2>日记列表</h2>
+      {dirId && <div>收藏 ID：${dirId}</div>}
       <nav>
-        <Link href={`/${pk}/new`}>写日记</Link>
-        <button type="button" onClick={newDir}>建立收藏</button>
+        <Link href={(dirId ? `/${pk}/dir/${dirId}` : `/${pk}`) + '/new'}>写日记</Link>
+        {dirId ? <Link href={`/${pk}`}>后退</Link> : <button type="button" onClick={newDir}>建立收藏</button>}
+        { }
         {diarys && Boolean(diarys.length) &&
           <label>
             <input type="checkbox" checked={isDesc} onChange={() => setIsDesc(!isDesc)} disabled={disabled} />
@@ -182,7 +184,7 @@ export default function DiaryView({ pk, dirId }) {
         <thead>
           <tr>
             <th>标题</th>
-            <th>类型</th>
+            {!dirId && <th>类型</th>}
             <th>修改</th>
             <th>删除</th>
           </tr>
@@ -190,7 +192,7 @@ export default function DiaryView({ pk, dirId }) {
         <tbody>
           {!dirId && dirs && Boolean(dirs.length) && dirs.map((dir) =>
             <tr key={dir.pk.split('#')[1]}>
-              <td><Link href="">{dir.dirName}</Link></td>
+              <td><Link href={`/${pk}/dir/${dir.pk.split('#')[1]}`}>{dir.dirName}</Link></td>
               <td>收藏</td>
               <td>
                 <button type="button" onClick={() => renameDir(dir.pk.split('#')[1], dir.dirName)}>改名</button>
@@ -210,8 +212,12 @@ export default function DiaryView({ pk, dirId }) {
                   {diary.title}
                 </Link>
               </td>
-              <td>日记</td>
-              <td><Link href={`/${pk}/${diary.sk.split('#')[1]}/edit`}>修改</Link></td>
+              {!dirId && <td>日记</td>}
+              <td>
+                <Link href={(dirId ? `/${pk}/dir/${dirId}` : `/${pk}`) + `/${diary.sk.split('#')[1]}/edit`}>
+                  修改
+                </Link>
+              </td>
               <td><button type="button" onClick={() => deleteDiary(diary)}>删除</button></td>
             </tr>
           )}

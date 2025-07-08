@@ -4,7 +4,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { useEffect, useState } from "react"
 
-export default function DiaryEdit({ pk, id }) {
+export default function DiaryEdit({ pk, dirId, id }) {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [hasError, setHasError] = useState(0)
@@ -40,7 +40,7 @@ export default function DiaryEdit({ pk, id }) {
       body: JSON.stringify({ id: id, title: title, content: content })
     })
     if (res.ok) {
-      redirect(`/${pk}`)
+      redirect(dirId ? `/${pk}/dir/${dirId}` : `/${pk}`)
     } else {
       setHasError(2)
       setDisabled(false)
@@ -51,6 +51,7 @@ export default function DiaryEdit({ pk, id }) {
     <>
       <h2>修改日记</h2>
       <div>当前 Email：<strong>{decodeURIComponent(pk)}</strong></div>
+      {dirId && <div>收藏 ID：${dirId}</div>}
       {hasError === 1 && <div style={{ color: "red" }}>出错，请刷新</div>}
       {hasError === 2 && <div style={{ color: "red" }}>出错，请再试</div>}
 
@@ -72,7 +73,7 @@ export default function DiaryEdit({ pk, id }) {
         <button type="submit" disabled={disabled || (content === preContent && title === preTitle)}>提交</button>
       </form>
 
-      <Link href={`/${pk}`}>返回</Link>
+      <Link href={dirId ? `/${pk}/dir/${dirId}` : `/${pk}`}>返回</Link>
     </>
   )
 }
