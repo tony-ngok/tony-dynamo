@@ -3,10 +3,11 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
-export default function DiaryView({ pk }) {
+export default function DiaryView({ pk, dirId }) {
   const [disabled, setDisabled] = useState(true)
   const [hasError, setHasError] = useState(false)
   const [userPk, setUserPk] = useState(undefined)
+  const [dirs, setDirs] = useState(undefined)
   const [diarys, setDiarys] = useState(undefined)
   const [isDesc, setIsDesc] = useState(false)
   const [actual, setActual] = useState(null)
@@ -29,18 +30,31 @@ export default function DiaryView({ pk }) {
   useEffect(() => {
     async function getDiarys() {
       const sort = isDesc ? 'descending' : 'ascending'
-      const res = await fetch(`/api/diarys?email=${pk}&sort=${sort}`)
-      if (res.ok) {
-        const res_json = await res.json()
-        setDiarys(res_json.data)
+
+      if (!dirId) {
+        const res0 = await fetch(`/api/dirs?email=${pk}&sort=${sort}`)
+        if (res0.ok) {
+          const res0_json = await res0.json()
+          setDirs(res0_json.data)
+        } else {
+          setHasError(true)
+          return
+        }
+      }
+
+      let diaryUrl = `/api/diarys?email=${pk}&sort=${sort}`
+      if (dirId) diaryUrl += `&dir=${dirId}`
+      const res1 = await fetch(diaryUrl)
+      if (res1.ok) {
+        const res1_json = await res1.json()
+        setDiarys(res1_json.data)
         setDisabled(false)
       } else {
         setHasError(true)
       }
     }
-    if (userPk) {
-      getDiarys()
-    }
+
+    if (userPk) { getDiarys() }
   }, [userPk, isDesc])
 
   const deleteDiary = async (diary) => {
@@ -58,6 +72,37 @@ export default function DiaryView({ pk }) {
     } else {
       alert("删除角色失败")
     }
+    setDisabled(false)
+  }
+
+  const newDir = async () => {
+    let dirName = ""
+    while (dirName === "") {
+      dirName = prompt('请输入收藏名：')
+      if (dirName === null) return
+      dirName = dirName.trim()
+    }
+
+    setDisabled(true)
+    setDisabled(false)
+  }
+
+  const renameDir = async (actualDirName) => {
+    let newDirName = ""
+    while (newDirName === "" || newDirName === actualDirName) {
+      newDirName = prompt('请输入新收藏名：', actualDirName)
+      if (newDirName === null) return
+      newDirName = newDirName.trim()
+    }
+
+    setDisabled(true)
+    setDisabled(false)
+  }
+
+  const deleteDir = async (dir) => {
+    if (!confirm(`删除收藏：${dir.dirName}？`)) return
+
+    setDisabled(true)
     setDisabled(false)
   }
 
@@ -89,24 +134,35 @@ export default function DiaryView({ pk }) {
       <h2>日记列表</h2>
       <nav>
         <Link href={`/${pk}/new`}>写日记</Link>
+        <button type="button" onClick={newDir}>建立收藏</button>
         {diarys && Boolean(diarys.length) &&
           <label>
             <input type="checkbox" checked={isDesc} onChange={() => setIsDesc(!isDesc)} disabled={disabled} />
-            标题降序排列
+            名称降序排列
           </label>
         }
       </nav>
 
-      <div>点击一个标题以查看日记：</div>
+      <div>点击一个日记题目（名称）以查看日记：</div>
       <table>
         <thead>
           <tr>
             <th>标题</th>
+            <th>类型</th>
             <th>修改</th>
             <th>删除</th>
           </tr>
         </thead>
         <tbody>
+          {dirs && Boolean(dirs.length) && dirs.map((dir) =>
+            <tr key={dir.pk.split('#')[1]}>
+              <td><Link href="">{dir.dirName}</Link></td>
+              <td>收藏</td>
+              <td><button type="button" onClick={() => renameDir(dir.dirName)}>改名</button></td>
+              <td><button type="button" onClick={() => deleteDir(dir)}>删除</button></td>
+            </tr>
+          )}
+
           {diarys && Boolean(diarys.length) && diarys.map((diary) =>
             <tr key={diary.sk.split('#')[1]}>
               <td>
@@ -118,6 +174,7 @@ export default function DiaryView({ pk }) {
                   {diary.title}
                 </Link>
               </td>
+              <td>日记</td>
               <td><Link href={`/${pk}/${diary.sk.split('#')[1]}/edit`}>修改</Link></td>
               <td><button type="button" onClick={() => deleteDiary(diary)}>删除</button></td>
             </tr>

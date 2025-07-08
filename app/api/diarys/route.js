@@ -6,18 +6,20 @@ export async function GET(request) {
   const url = new URL(request.url)
   let email = decodeURIComponent(url.searchParams.get('email') || "")
   const sort = url.searchParams.get('sort') || 'ascending'
-  if (!(emailValidate(email) && sort)) {
+  if (!emailValidate(email) || (sort !== 'ascending' && sort !== 'descending')) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
   try {
-    const res = await DiaryModel.query().where('GSI1PK').eq(`AUTOR#EMAIL#${email}`)
-      .using('nameIndex').sort(sort).exec()
+    const dir = url.searchParams.get('dir')
+    let gsi1pk = `AUTOR#EMAIL#${email}`
+    if (dir) gsi1pk += `#DIR#${dir}`
 
-    // console.log(res)
+    const res = await DiaryModel.query().where('GSI1PK').eq(gsi1pk).using('nameIndex').sort(sort).exec()
+    console.log(res)
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
-    // console.log(err)
+    console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
   }
 }
