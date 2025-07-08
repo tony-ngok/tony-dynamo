@@ -16,10 +16,10 @@ export async function GET(request) {
     if (dir) gsi1pk += `#DIR#${dir}`
 
     const res = await DiaryModel.query().where('GSI1PK').eq(gsi1pk).using('nameIndex').sort(sort).exec()
-    console.log(res)
+    // console.log(res)
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
-    console.log(err)
+    // console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
   }
 }

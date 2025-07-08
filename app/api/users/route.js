@@ -1,6 +1,7 @@
 import UserModel from "@/app/models/UserModel"
 import DiaryModel from "@/app/models/DiaryModel"
 import { apiString, emailValidate } from "@/app/utils"
+import DirModel from "@/app/models/DirModel"
 
 export async function GET(request) {
   const url = new URL(request.url)
@@ -101,6 +102,17 @@ export async function DELETE(request) {
       }))
       // console.log(pksks)
       await DiaryModel.batchDelete(pksks)
+    }
+
+    const res_dirs = await DirModel.query().where('GSI1PK').eq(`DIR#EMAIL#${email}`).exec()
+    // console.log(res_dirs)
+    if (res_dirs.count) {
+      const pksks_dirs = res_dirs.map(i => ({
+        pk: i.pk,
+        sk: i.sk
+      }))
+      // console.log(pksks_dirs)
+      await DirModel.batchDelete(pksks_dirs)
     }
 
     const pk = `USER#EMAIL#${email}`

@@ -98,7 +98,7 @@ export default function DiaryView({ pk, dirId }) {
     setDisabled(false)
   }
 
-  const renameDir = async (actualDirName) => {
+  const renameDir = async (dirId, actualDirName) => {
     let newDirName = ""
     while (newDirName === "" || newDirName === actualDirName) {
       newDirName = prompt('请输入新收藏名：', actualDirName)
@@ -107,6 +107,19 @@ export default function DiaryView({ pk, dirId }) {
     }
 
     setDisabled(true)
+    const res = await fetch('/api/dirs', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: dirId, dirName: newDirName })
+    })
+    if (res.ok) {
+      const newDir = (await res.json()).data
+      setDirs(prevs =>
+        prevs.map(prev => (prev.pk === newDir.pk ? newDir : prev))
+      )
+    } else {
+      alert("收藏改名失败")
+    }
     setDisabled(false)
   }
 
@@ -114,6 +127,16 @@ export default function DiaryView({ pk, dirId }) {
     if (!confirm(`删除收藏：${dir.dirName}？`)) return
 
     setDisabled(true)
+    const res = await fetch("/api/dirs", {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: dir.pk.split('#')[1] })
+    })
+    if (res.ok) {
+      setDiarys(diarys.filter(d => d.pk !== dir.pk))
+    } else {
+      alert("删除收藏失败")
+    }
     setDisabled(false)
   }
 
@@ -169,7 +192,9 @@ export default function DiaryView({ pk, dirId }) {
             <tr key={dir.pk.split('#')[1]}>
               <td><Link href="">{dir.dirName}</Link></td>
               <td>收藏</td>
-              <td><button type="button" onClick={() => renameDir(dir.dirName)}>改名</button></td>
+              <td>
+                <button type="button" onClick={() => renameDir(dir.pk.split('#')[1], dir.dirName)}>改名</button>
+              </td>
               <td><button type="button" onClick={() => deleteDir(dir)}>删除</button></td>
             </tr>
           )}
