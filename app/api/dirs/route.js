@@ -1,5 +1,6 @@
 import DirModel from "@/app/models/DirModel"
-import { emailValidate } from "@/app/utils"
+import { apiString, emailValidate } from "@/app/utils"
+import * as uuid from "uuid"
 
 export async function GET(request) {
   const url = new URL(request.url)
@@ -16,6 +17,68 @@ export async function GET(request) {
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
     // console.log(err)
+    return Response.json({ error: err.toString() }, { status: 500 })
+  }
+}
+
+export async function POST(request) {
+  let data
+  try {
+    data = await request.json()
+  } catch {
+    return Response.json({ error: "Bad request" }, { status: 400 })
+  }
+
+  const email = apiString(data.email)
+  const dirName = apiString(data.dirName)
+  if (!(emailValidate(email) && dirName)) {
+    return Response.json({ error: "Bad request" }, { status: 400 })
+  }
+
+  try {
+    const id = uuid.v4()
+    const res = await DirModel.create({
+      pk: `DIR#${id}`,
+      sk: `DIR#${id}`,
+      GSI1PK: `DIR#EMAIL#${email}`,
+      GSI1SK: `DIRNAME#${dirName}`,
+      dirName: dirName
+    })
+    console.log(res)
+    return Response.json({ data: res }, { status: 200 })
+  } catch (err) {
+    console.log(err)
+    return Response.json({ error: err.toString() }, { status: 500 })
+  }
+}
+
+export async function PATCH(request) {
+  let data
+  try {
+    data = await request.json()
+  } catch {
+    return Response.json({ error: "Bad request" }, { status: 400 })
+  }
+
+  const email = apiString(data.email)
+  const dirName = apiString(data.dirName)
+  if (!(emailValidate(email) && dirName)) {
+    return Response.json({ error: "Bad request" }, { status: 400 })
+  }
+
+  try {
+    const id = uuid.v4()
+    const res = await DirModel.create({
+      pk: `DIR#${id}`,
+      sk: `DIR#${id}`,
+      GSI1PK: `DIR#EMAIL#${email}`,
+      GSI1SK: `DIRNAME#${dirName}`,
+      dirName: dirName
+    })
+    console.log(res)
+    return Response.json({ data: res }, { status: 200 })
+  } catch (err) {
+    console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
   }
 }

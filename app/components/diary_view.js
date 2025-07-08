@@ -70,7 +70,7 @@ export default function DiaryView({ pk, dirId }) {
       if (actual.sk === diary.sk) { setActual(null) }
       setDiarys(diarys.filter(d => d.sk !== diary.sk))
     } else {
-      alert("删除角色失败")
+      alert("删除日记失败")
     }
     setDisabled(false)
   }
@@ -84,6 +84,17 @@ export default function DiaryView({ pk, dirId }) {
     }
 
     setDisabled(true)
+    const res = await fetch('/api/dirs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: decodeURIComponent(pk), dirName: dirName })
+    })
+    if (res.ok) {
+      const newDir = (await res.json()).data
+      setDirs(dirs => [...dirs, newDir])
+    } else {
+      alert("创建收藏失败")
+    }
     setDisabled(false)
   }
 
@@ -154,7 +165,7 @@ export default function DiaryView({ pk, dirId }) {
           </tr>
         </thead>
         <tbody>
-          {dirs && Boolean(dirs.length) && dirs.map((dir) =>
+          {!dirId && dirs && Boolean(dirs.length) && dirs.map((dir) =>
             <tr key={dir.pk.split('#')[1]}>
               <td><Link href="">{dir.dirName}</Link></td>
               <td>收藏</td>
