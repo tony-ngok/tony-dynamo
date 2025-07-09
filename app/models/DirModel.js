@@ -15,7 +15,7 @@ const DirSchema = new dynamoose.Schema({
     index: {
       name: 'nameIndex',
       type: 'global',
-      rangeKey: 'GS1SK'
+      rangeKey: 'GSI1SK'
     }
   },
   GSI1SK: String,

@@ -1,5 +1,4 @@
 import DiaryModel from "@/app/models/DiaryModel"
-import { emailValidate } from "@/app/utils"
 
 export async function GET(request) {
   const url = new URL(request.url)

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 export default function DiaryNew({ pk, dirId }) {
   const [title, setTitle] = useState("")

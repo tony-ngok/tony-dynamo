@@ -93,7 +93,6 @@ export async function DELETE(request) {
   }
 
   try {
-    // 待完成：要把所有的删光
     const res_pk = await DiaryModel.query().where('GSI1PK').eq(`AUTOR#EMAIL#${email}`).exec()
     // console.log(res_pk)
     if (res_pk.count) {

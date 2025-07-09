@@ -12,10 +12,10 @@ export async function GET(request) {
 
   try {
     const dir = url.searchParams.get('dir')
-    let gsi1pk = `AUTOR#EMAIL#${email}`
-    if (dir) gsi1pk += `#DIR#${dir}`
+    const gsisk = dir ? `DIR#${dir}#DIARY` : "DIARY"
 
-    const res = await DiaryModel.query().where('GSI1PK').eq(gsi1pk).using('nameIndex').sort(sort).exec()
+    const res = await DiaryModel.query().where('GSI1PK').eq(`AUTOR#EMAIL#${email}`)
+      .where('GSI1SK').beginsWith(gsisk).using('nameIndex').sort(sort).exec()
     // console.log(res)
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
@@ -41,15 +41,14 @@ export async function POST(request) {
 
   try {
     const dir = apiString(data.dir)
-    let gsi1pk = `AUTOR#EMAIL#${email}`
-    if (dir) gsi1pk += `#DIR#${dir}`
+    const gsis1k = (dir ? `DIR#${dir}#DIARY` : "DIARY") + `#TITLE#${title}`
 
     const id = uuid.v4()
     const res = await DiaryModel.create({
       pk: `DIARY#${id}`,
       sk: `DIARY#${id}`,
-      GSI1PK: gsi1pk,
-      GSI1SK: `DIARY#TITLE#${title}`,
+      GSI1PK: `AUTOR#EMAIL#${email}`,
+      GSI1SK: gsis1k,
       title: title,
       content: content
     })
@@ -78,8 +77,11 @@ export async function PATCH(request) {
   const pk = `DIARY#${id}`
 
   try {
+    const dir = apiString(data.dir)
+    const gsis1k = (dir ? `DIR#${dir}#DIARY` : "DIARY") + `#TITLE#${title}`
+
     const res = await DiaryModel.update({ pk: pk, sk: pk }, {
-      content: content, title: title, GSI1SK: `DIARY#TITLE#${title}`
+      content: content, title: title, GSI1SK: gsis1k
     })
     // console.log(res)
     return Response.json({ data: res }, { status: 200 })
