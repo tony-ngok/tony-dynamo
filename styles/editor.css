@@ -1,0 +1,20 @@
+.editor-strong {
+  font-weight: 700
+}
+
+.editor-em {
+  font-style: italic
+}
+
+.ltr {
+  text-align: left
+}
+
+.rtl {
+  text-align: right
+}
+
+.editor-p {
+  margin: 0 0 8px 0;
+  position: relative
+}

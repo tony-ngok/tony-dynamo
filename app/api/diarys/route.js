@@ -35,7 +35,8 @@ export async function POST(request) {
   const email = apiString(data.email)
   const title = apiString(data.title)
   const content = apiString(data.content)
-  if (!(emailValidate(email) && content && title)) {
+  const htmlContent = apiString(data.htmlContent)
+  if (!(emailValidate(email) && title && content && htmlContent)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
@@ -50,7 +51,8 @@ export async function POST(request) {
       GSI1PK: `AUTOR#EMAIL#${email}`,
       GSI1SK: gsis1k,
       title: title,
-      content: content
+      content: content,
+      htmlContent: htmlContent
     })
     // console.log(res)
     return Response.json({ data: res }, { status: 200 })
@@ -71,7 +73,8 @@ export async function PATCH(request) {
   const id = apiString(data.id)
   const title = apiString(data.title)
   const content = apiString(data.content)
-  if (!(id && title && content)) {
+  const htmlContent = apiString(data.htmlContent)
+  if (!(id && title && content && htmlContent)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
   const pk = `DIARY#${id}`
@@ -81,7 +84,7 @@ export async function PATCH(request) {
     const gsis1k = (dir ? `DIR#${dir}#DIARY` : "DIARY") + `#TITLE#${title}`
 
     const res = await DiaryModel.update({ pk: pk, sk: pk }, {
-      content: content, title: title, GSI1SK: gsis1k
+      content: content, htmlContent: htmlContent, title: title, GSI1SK: gsis1k
     })
     // console.log(res)
     return Response.json({ data: res }, { status: 200 })

@@ -2,13 +2,20 @@
 
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import Editor from "../lexical_editor/editor"
 
 export default function DiaryNew({ pk, dirId }) {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
+  const [htmlContent, setHtmlContent] = useState("")
   const [createError, setCreateError] = useState(false)
   const [disabled, setDisabled] = useState(false)
+
+  useEffect(() => {
+    if (content !== undefined) { console.log(content) }
+    if (htmlContent !== undefined) { console.log(htmlContent) }
+  }, [htmlContent, content]) // DEBUG
 
   const handelSubmit = async (e) => {
     e.preventDefault()
@@ -18,7 +25,13 @@ export default function DiaryNew({ pk, dirId }) {
     const res = await fetch('/api/diarys', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: decodeURIComponent(pk), title: title, content: content, dir: dirId })
+      body: JSON.stringify({
+        email: decodeURIComponent(pk),
+        title: title,
+        content: content,
+        htmlContent: htmlContent,
+        dir: dirId
+      })
     })
     if (res.ok) {
       redirect(dirId ? `/${pk}/dir/${dirId}` : `/${pk}`)
@@ -45,11 +58,7 @@ export default function DiaryNew({ pk, dirId }) {
 
         <div>
           <label>内容</label>
-          <textarea onChange={(e) => setContent(e.target.value)}
-            disabled={disabled}
-            style={{ width: "400px", height: "200px" }}
-            required
-          />
+          <Editor setContent={setContent} setHtmlContent={setHtmlContent} isError={createError} />
         </div>
 
         <button type="submit" disabled={disabled}>提交</button>

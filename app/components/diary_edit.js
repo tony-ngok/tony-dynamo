@@ -3,14 +3,19 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import { useEffect, useState } from "react"
+import Editor from "../lexical_editor/editor"
 
 export default function DiaryEdit({ pk, dirId, id }) {
   const [title, setTitle] = useState("")
-  const [content, setContent] = useState("")
+  const [content, setContent] = useState(undefined)
+  const [htmlContent, setHtmlContent] = useState(undefined)
   const [hasError, setHasError] = useState(0)
-  const [disabled, setDisabled] = useState(true)
-  const [preTitle, setPreTitle] = useState("")
-  const [preContent, setPreContent] = useState("")
+  const [disabled, setDisabled] = useState(false)
+
+  useEffect(() => {
+    if (content !== undefined) { console.log(content) }
+    if (htmlContent !== undefined) { console.log(htmlContent) }
+  }, [htmlContent, content]) // DEBUG
 
   useEffect(() => {
     async function getDiary() {
@@ -18,10 +23,8 @@ export default function DiaryEdit({ pk, dirId, id }) {
       if (res_diary.ok) {
         const res_data = (await res_diary.json()).data
         setTitle(res_data.title)
-        setPreTitle(res_data.title)
         setContent(res_data.content)
-        setPreContent(res_data.content)
-        setDisabled(false)
+        setHtmlContent(res_data.htmlContent)
       } else {
         setHasError(1)
       }
@@ -37,7 +40,13 @@ export default function DiaryEdit({ pk, dirId, id }) {
     const res = await fetch('/api/diarys', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: id, title: title, content: content, dir: dirId })
+      body: JSON.stringify({
+        id: id,
+        title: title,
+        content: content,
+        htmlContent: htmlContent,
+        dir: dirId
+      })
     })
     if (res.ok) {
       redirect(dirId ? `/${pk}/dir/${dirId}` : `/${pk}`)
@@ -47,12 +56,14 @@ export default function DiaryEdit({ pk, dirId, id }) {
     }
   }
 
+  if (content === undefined) return <div>载入中...</div>
+  if (hasError === 1) return <div style={{ color: "red" }}>出错，请刷新</div>
+
   return (
     <>
       <h2>修改日记</h2>
       <div>当前 Email：<strong>{decodeURIComponent(pk)}</strong></div>
       {dirId && <div>收藏 ID：${dirId}</div>}
-      {hasError === 1 && <div style={{ color: "red" }}>出错，请刷新</div>}
       {hasError === 2 && <div style={{ color: "red" }}>出错，请再试</div>}
 
       <form onSubmit={handelSubmit}>
@@ -63,14 +74,12 @@ export default function DiaryEdit({ pk, dirId, id }) {
 
         <div>
           <label>内容</label>
-          <textarea value={content} onChange={(e) => setContent(e.target.value)}
-            disabled={disabled}
-            style={{ width: "400px", height: "200px" }}
-            required
+          <Editor initContent={content} setContent={setContent} setHtmlContent={setHtmlContent}
+            editable={!disabled} isError={Boolean(hasError)}
           />
         </div>
 
-        <button type="submit" disabled={disabled || (content === preContent && title === preTitle)}>提交</button>
+        <button type="submit" disabled={disabled}>提交</button>
       </form>
 
       <Link href={dirId ? `/${pk}/dir/${dirId}` : `/${pk}`}>返回</Link>

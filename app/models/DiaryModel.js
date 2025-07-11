@@ -20,7 +20,8 @@ const DiarySchema = new dynamoose.Schema({
   },
   GSI1SK: String,
   title: String,
-  content: String
+  content: String,
+  htmlContent: String
 })
 
 const DiaryModel = dynamoose.model("Diary", DiarySchema)

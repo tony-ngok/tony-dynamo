@@ -227,7 +227,7 @@ export default function DiaryView({ pk, dirId }) {
       {actual &&
         <>
           <h3>{actual.title}</h3>
-          <textarea value={actual.content} style={{ width: "400px", height: "200px" }} readOnly />
+          <div dangerouslySetInnerHTML={{ __html: actual.htmlContent }} />
         </>
       }
     </>
