@@ -8,6 +8,7 @@ import {
   FORMAT_TEXT_COMMAND, CAN_UNDO_COMMAND, UNDO_COMMAND, CAN_REDO_COMMAND, REDO_COMMAND
 } from 'lexical'
 import BlockSelect from './block_select'
+import LinkEditor from './link_editor'
 
 export default function EditorBar() {
   const [editor] = useLexicalComposerContext()
@@ -27,17 +28,20 @@ export default function EditorBar() {
     }
 
     return mergeRegister(
-      // 注册/取消注册监听器，以获得选中文字的状态
+      // registerUpdateListener：每当编辑器状态改变时触发
+      // 获得选中文字的状态
       editor.registerUpdateListener(({ editorState }) => {
         editorState.read(() => { updateToolbar() })
       }),
 
-      // 获得当前是否能够撤消的状态
+      // registerCommand：每当收到指令时触发
+      // 获得当前是否能够撤消的状态（当历史改变时，即发送指令）
       editor.registerCommand(CAN_UNDO_COMMAND, (payload) => {
         setCanUndo(payload)
         return false
       }, 1),
 
+      // 获得当前是否能够重做的状态（当历史改变时，即发送指令）
       editor.registerCommand(CAN_REDO_COMMAND, (payload) => {
         setCanRedo(payload)
         return false
@@ -64,6 +68,7 @@ export default function EditorBar() {
         <button type="button" disabled={!canRedo} onClick={() => editor.dispatchCommand(REDO_COMMAND)}>
           重做
         </button>
+        <LinkEditor editor={editor} />
       </nav>
       <BlockSelect editor={editor} />
     </>
