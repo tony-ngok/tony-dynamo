@@ -165,7 +165,7 @@ export default function DiaryView({ pk, dirId }) {
       <div>当前角色：<strong>{userPk.name}（{decodeURIComponent(pk)}）</strong></div>
       <Link href="/">返回首页</Link>
 
-      <h2>日记列表</h2>
+      <h1>日记列表</h1>
       {dirId && <div>收藏 ID：${dirId}</div>}
       <nav>
         <Link href={(dirId ? `/${pk}/dir/${dirId}` : `/${pk}`) + '/new'}>写日记</Link>
@@ -226,7 +226,7 @@ export default function DiaryView({ pk, dirId }) {
 
       {actual &&
         <>
-          <h3>{actual.title}</h3>
+          <h2>{actual.title}</h2>
           <div dangerouslySetInnerHTML={{ __html: actual.htmlContent }} />
         </>
       }

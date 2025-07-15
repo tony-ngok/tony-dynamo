@@ -10,6 +10,7 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary'
 import { $generateHtmlFromNodes } from '@lexical/html'
+import EditorBar from './components/editor_bar'
 
 export default function Editor({ initContent, setContent, setHtmlContent, editable = true, isError = false }) {
   const initConfig = {
@@ -25,7 +26,7 @@ export default function Editor({ initContent, setContent, setHtmlContent, editab
     color: "#999",
     overflow: "hidden",
     position: "absolute",
-    top: isError ? "160px" : "140px",
+    top: isError ? "202px" : "180px",
     left: "10px",
     textOverflow: "ellipsis",
     userSelect: "none",
@@ -45,6 +46,7 @@ export default function Editor({ initContent, setContent, setHtmlContent, editab
 
   return (
     <LexicalComposer initialConfig={initConfig}>
+      <EditorBar />
       <RichTextPlugin
         contentEditable={
           <ContentEditable

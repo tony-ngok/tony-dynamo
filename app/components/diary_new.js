@@ -12,10 +12,10 @@ export default function DiaryNew({ pk, dirId }) {
   const [createError, setCreateError] = useState(false)
   const [disabled, setDisabled] = useState(false)
 
-  useEffect(() => {
-    if (content !== undefined) { console.log(content) }
-    if (htmlContent !== undefined) { console.log(htmlContent) }
-  }, [htmlContent, content]) // DEBUG
+  // useEffect(() => {
+  //   if (content !== undefined) { console.log(content) }
+  //   if (htmlContent !== undefined) { console.log(htmlContent) }
+  // }, [htmlContent, content]) // DEBUG
 
   const handelSubmit = async (e) => {
     e.preventDefault()
@@ -45,7 +45,7 @@ export default function DiaryNew({ pk, dirId }) {
 
   return (
     <>
-      <h2>创建日记</h2>
+      <h1>创建日记</h1>
       <div>当前 Email：<strong>{decodeURIComponent(pk)}</strong></div>
       {dirId && <div>收藏 ID：${dirId}</div>}
       {createError && <div style={{ color: "red" }}>出错，请再试</div>}
@@ -57,7 +57,6 @@ export default function DiaryNew({ pk, dirId }) {
         </div>
 
         <div>
-          <label>内容</label>
           <Editor setContent={setContent} setHtmlContent={setHtmlContent} isError={createError} />
         </div>
 

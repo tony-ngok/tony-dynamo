@@ -15,6 +15,47 @@
 }
 
 .editor-p {
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
   position: relative
+}
+
+.button-true {
+  background-color: blue;
+  color: white
+}
+
+.button-false {
+  background-color: lightgrey;
+  color: black
+}
+
+.editor-quote {
+  margin: 0;
+  margin-left: 20px;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 15px;
+  color: rgb(101, 103, 107);
+  border-left-color: rgb(206, 208, 212);
+  border-left-width: 4px;
+  border-left-style: solid;
+  padding-left: 16px
+}
+
+.editor-head {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  padding: 0;
+}
+
+.editor-list-ol {
+  padding: 0;
+  margin: 0;
+  margin-left: 16px
+}
+
+.editor-list-ul {
+  padding: 0;
+  margin: 0;
+  margin-left: 16px
 }

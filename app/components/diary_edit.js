@@ -12,10 +12,10 @@ export default function DiaryEdit({ pk, dirId, id }) {
   const [hasError, setHasError] = useState(0)
   const [disabled, setDisabled] = useState(false)
 
-  useEffect(() => {
-    if (content !== undefined) { console.log(content) }
-    if (htmlContent !== undefined) { console.log(htmlContent) }
-  }, [htmlContent, content]) // DEBUG
+  // useEffect(() => {
+  //   if (content !== undefined) { console.log(content) }
+  //   if (htmlContent !== undefined) { console.log(htmlContent) }
+  // }, [htmlContent, content]) // DEBUG
 
   useEffect(() => {
     async function getDiary() {
@@ -61,7 +61,7 @@ export default function DiaryEdit({ pk, dirId, id }) {
 
   return (
     <>
-      <h2>修改日记</h2>
+      <h1>修改日记</h1>
       <div>当前 Email：<strong>{decodeURIComponent(pk)}</strong></div>
       {dirId && <div>收藏 ID：${dirId}</div>}
       {hasError === 2 && <div style={{ color: "red" }}>出错，请再试</div>}
@@ -73,7 +73,6 @@ export default function DiaryEdit({ pk, dirId, id }) {
         </div>
 
         <div>
-          <label>内容</label>
           <Editor initContent={content} setContent={setContent} setHtmlContent={setHtmlContent}
             editable={!disabled} isError={Boolean(hasError)}
           />
