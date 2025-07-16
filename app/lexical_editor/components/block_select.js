@@ -45,10 +45,6 @@ export default function BlockSelect({ editor }) {
     })
   }, [editor])
 
-  // useEffect(() => {
-  //   console.log(block)
-  // }, [block]) // DEBUG
-
   const formatP = () => {
     if (block !== 'paragraph') {
       editor.update(() => {

@@ -12,11 +12,6 @@ export default function DiaryEdit({ pk, dirId, id }) {
   const [hasError, setHasError] = useState(0)
   const [disabled, setDisabled] = useState(false)
 
-  // useEffect(() => {
-  //   if (content !== undefined) { console.log(content) }
-  //   if (htmlContent !== undefined) { console.log(htmlContent) }
-  // }, [htmlContent, content]) // DEBUG
-
   useEffect(() => {
     async function getDiary() {
       const res_diary = await fetch(`/api/diary?id=${id}`)

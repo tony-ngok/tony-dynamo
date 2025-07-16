@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import Editor from "../lexical_editor/editor"
 
 export default function DiaryNew({ pk, dirId }) {
@@ -11,11 +11,6 @@ export default function DiaryNew({ pk, dirId }) {
   const [htmlContent, setHtmlContent] = useState("")
   const [createError, setCreateError] = useState(false)
   const [disabled, setDisabled] = useState(false)
-
-  // useEffect(() => {
-  //   if (content !== undefined) { console.log(content) }
-  //   if (htmlContent !== undefined) { console.log(htmlContent) }
-  // }, [htmlContent, content]) // DEBUG
 
   const handelSubmit = async (e) => {
     e.preventDefault()
