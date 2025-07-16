@@ -31,12 +31,13 @@ export default function LinkEditor({ editor }) {
   const edit = () => {
     let link = ""
     while (!(link && (link.startsWith('http://') || link.startsWith('https://')))) {
-      link = prompt("请输入连结：", linkUrl)
+      link = prompt("请输入连结（http 或 https）：", linkUrl)
       if (link === null) return
       link = link.trim()
     }
-    setLinkUrl(link)
-    editor.dispatchCommand(TOGGLE_LINK_COMMAND, link)
+    editor.dispatchCommand(TOGGLE_LINK_COMMAND, {
+      url: link, target: '_blank', rel: 'noopener noreferrer'
+    })
   }
 
   return (
