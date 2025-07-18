@@ -138,8 +138,8 @@ function FloatLinkEditor({ editor, anchorElem, isLink, setIsLink }) {
             ref={inputRef}
             className="link-input"
             value={editedLinkUrl}
-            onChange={(event) => { setEditedLinkUrl(event.target.value) }}
-            onKeyDown={(event) => { monitorInputInteraction(event) }}
+            onChange={(e) => { setEditedLinkUrl(e.target.value) }}
+            onKeyDown={(e) => { monitorInputInteraction(e) }}
           />
           <div>
             <div
