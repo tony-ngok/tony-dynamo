@@ -6,14 +6,6 @@
   font-style: italic
 }
 
-.ltr {
-  text-align: left
-}
-
-.rtl {
-  text-align: right
-}
-
 .editor-p {
   margin: 0 0 4px 0;
   position: relative
