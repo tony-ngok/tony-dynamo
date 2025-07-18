@@ -63,7 +63,7 @@ export default function Editor({ initContent, setContent, setHtmlContent, editab
           <div ref={onRef}>
             <ContentEditable
               // 改变编辑器外观、大小等
-              style={{ width: "600px", border: "1px solid", padding: "0 2px" }}
+              style={{ border: "1px solid", padding: "0 2px" }}
             />
           </div>
         }
