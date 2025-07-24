@@ -17,7 +17,7 @@ export function UpdateDirDialogue({ id, dirName, onClose, onUpdate, hasError, di
 
   const handelSubmit = async (e) => {
     e.preventDefault()
-    await onUpdate({ id: id, dirName: dirName, newDirName: newDirName })
+    await onUpdate({ id: id, newDirName: newDirName })
   }
 
   if (!(id && dirName)) return null

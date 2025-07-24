@@ -2,7 +2,7 @@
 
 export function DeleteDirDialogue({ id, dirName, onClose, onDelete, hasError, disabled }) {
   const handelDelete = async () => {
-    await onDelete({ id: id, dirName: dirName })
+    await onDelete({ id: id })
   }
 
   if (!(id && dirName)) return null

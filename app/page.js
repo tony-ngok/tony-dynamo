@@ -6,7 +6,7 @@ import Info from "./components/info"
 import { getId, toLocaleDateTime } from "./string_utils"
 import { CreateDirDialogue } from "./components/dialogues/create_dir"
 import { UpdateDirDialogue } from "./components/dialogues/update_dir"
-import { DeleteDirDialogue } from "./components/dialogues/delete_Dir"
+import { DeleteDirDialogue } from "./components/dialogues/delete_dir"
 
 export default function App() {
   const [disabled, setDisabled] = useState(true)
