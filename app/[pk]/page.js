@@ -1,6 +1,6 @@
-import DiaryView from "../components/diary_view"
+import ArticleView from "../components/article_view"
 
 export default async function Pk({ params }) {
   const { pk } = await params
-  return <DiaryView pk={pk} />
+  return <ArticleView pk={pk} />
 }

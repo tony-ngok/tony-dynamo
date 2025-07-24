@@ -1,136 +1,185 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { emailValidate } from "./utils"
 import Link from "next/link"
+import Info from "./components/info"
+import { getId, toLocaleDateTime } from "./string_utils"
+import { CreateDirDialogue } from "./components/dialogues/create_dir"
+import { UpdateDirDialogue } from "./components/dialogues/update_dir"
+import { DeleteDirDialogue } from "./components/dialogues/delete_Dir"
 
 export default function App() {
   const [disabled, setDisabled] = useState(true)
-  const [users, setUsers] = useState(undefined)
-  const [hasError, setHasError] = useState(false)
-  const [isDesc, setIsDesc] = useState(false)
+  const [dirs, setDirs] = useState(undefined)
+  const [hasReadError, setHasReadError] = useState(false)
+  const [isAsc, setIsAsc] = useState(false)
+  const [isCreateDir, setIsCreateDir] = useState(false)
+  const [updateDirId, setUpdateDirId] = useState(null)
+  const [updateDirName, setUpdateDirName] = useState("")
+  const [deleteDirId, setDeleteDirId] = useState(null)
+  const [deleteDirName, setDeleteDirName] = useState("")
+  const [hasWriteError, setHasWriteError] = useState(false)
 
   useEffect(() => {
-    async function getUsers() {
-      const sort = isDesc ? 'descending' : 'ascending'
-      const res = await fetch(`/api/users?sort=${sort}`)
+    async function getDirs() {
+      const sort = isAsc ? 'ascending' : 'descending'
+      const res = await fetch(`/api/dirs?sort=${sort}`)
       if (res.ok) {
-        setUsers((await res.json()).data)
+        setDirs((await res.json()).data)
         setDisabled(false)
       } else {
-        setHasError(true)
+        setHasReadError(true)
       }
     }
-    getUsers()
-  }, [isDesc])
+    getDirs()
+  }, [isAsc])
 
-  const createNewUser = async () => {
-    let newEmail = ""
-    while (newEmail === "") {
-      newEmail = prompt("请输入 Email：")
-      if (newEmail === null) return
-      newEmail = newEmail.trim()
-      if (!emailValidate(newEmail)) newEmail = ""
-    }
+  const openCreateDir = () => {
+    setHasWriteError(false)
+    setIsCreateDir(true)
+  }
 
-    let newUsername = ""
-    while (newUsername === "") {
-      newUsername = prompt(`Email：${newEmail}\n请输入角色名：`)
-      if (newUsername === null) return
-      newUsername = newUsername.trim()
-    }
+  const openUpdateDir = (dirId, dirName) => {
+    setHasWriteError(false)
+    setUpdateDirId(dirId)
+    setUpdateDirName(dirName)
+  }
 
+  const closeUpdateDir = () => {
+    setUpdateDirId(null)
+    setUpdateDirName("")
+  }
+
+  const openDeleteDir = (dirId, dirName) => {
+    setHasWriteError(false)
+    setDeleteDirId(dirId)
+    setDeleteDirName(dirName)
+  }
+
+  const closeDeleteDir = () => {
+    setDeleteDirId(null)
+    setDeleteDirName("")
+  }
+
+  const handelCreate = async (data) => {
+    setHasWriteError(false)
     setDisabled(true)
-    const res = await fetch("/api/users", {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: newEmail, name: newUsername })
-    })
-    if (res.ok) {
-      const newUser = (await res.json()).data
-      setUsers(users => [...users, newUser])
-    } else {
-      alert("创建角色失败")
+
+    if (data) {
+      const res = await fetch("/api/dirs", {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+      if (res.ok) {
+        const newDir = (await res.json()).data
+        setDirs([...dirs, newDir])
+        setIsCreateDir(false)
+      } else {
+        setHasWriteError(true)
+      }
     }
+
     setDisabled(false)
   }
 
-  const updateUser = async (email, actualName) => {
-    let newUsername = ""
-    while (newUsername === "" || newUsername === actualName) {
-      newUsername = prompt(`Email：${email}\n请输入新角色名：`, actualName)
-      if (newUsername === null) return
-      newUsername = newUsername.trim()
+  const handelUpdate = async (data) => {
+    setHasWriteError(false)
+    setDisabled(true)
+
+    if (data) {
+      const res = await fetch("/api/dirs", {
+        method: 'PATCH',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+      if (res.ok) {
+        const newDir = (await res.json()).data
+        if (newDir) {
+          setDirs(dirs.map(dir => (dir.pk === newDir.pk ? newDir : dir)))
+        }
+        closeUpdateDir()
+      } else {
+        setHasWriteError(true)
+      }
     }
 
-    setDisabled(true)
-    const res = await fetch("/api/users", {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email, name: newUsername })
-    })
-    if (res.ok) {
-      const newUser = (await res.json()).data
-      setUsers(prevs =>
-        prevs.map(prev => (prev.pk === newUser.pk ? newUser : prev))
-      )
-    } else {
-      alert("改名失败")
-    }
     setDisabled(false)
   }
 
-  const deleteUser = async (email) => {
-    if (!confirm(`删除 Email ${email} 所对应的角色？`)) return
-
+  const handelDelete = async (data) => {
+    setHasWriteError(false)
     setDisabled(true)
-    const res = await fetch("/api/users", {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email })
-    })
-    if (res.ok) {
-      setUsers(users.filter(user => user.pk !== `USER#EMAIL#${email}`))
-    } else {
-      alert("删除角色失败")
+
+    if (data) {
+      const res = await fetch("/api/dirs", {
+        method: 'DELETE',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+      if (res.ok) {
+        if (deleteDirId) {
+          setDirs(dirs.filter(dir => (dir.pk !== `DIR#${deleteDirId}`)))
+        }
+        closeDeleteDir()
+      } else {
+        setHasWriteError(true)
+      }
     }
+
     setDisabled(false)
   }
 
-  if (hasError) return <div>出错了，刷新一下吧</div>
+  if (hasReadError) return <div>出错了，刷新一下吧</div>
 
   return (
     <>
-      <h1>全部角色</h1>
+      <Info />
+      <h1>全部目录</h1>
+      <div>
+        写文章前，请先创建并进入一个目录；也可以直接进入一个已有的目录写文章。
+        <br />
+        <strong>注意：如果删了一个目录，里面的文章就全都没了。</strong>
+      </div>
 
       <nav>
-        <button type="button" onClick={createNewUser} disabled={disabled}>新建角色</button>
+        <button type="button" onClick={openCreateDir} disabled={disabled}>新建目录</button>
         <label>
-          <input type="checkbox" checked={isDesc} onChange={() => setIsDesc(!isDesc)} disabled={disabled} />
-          降序排列
+          <input type="checkbox" checked={isAsc} onChange={() => setIsAsc(!isAsc)} disabled={disabled} />
+          按更新时间升序排列
         </label>
       </nav>
 
       <table>
         <thead>
           <tr>
-            <th>角色名</th>
-            <th>Email</th>
+            <th>目录名</th>
+            <th>更新时间</th>
             <th>改名</th>
             <th>删除</th>
           </tr>
         </thead>
         <tbody>
-          {users && Boolean(users.length) && users.map((user) =>
-            <tr key={user.pk}>
-              <td><Link href={`/${encodeURIComponent(user.email)}`}>{user.name}</Link></td>
-              <td><Link href={`/${encodeURIComponent(user.email)}`}>{user.email}</Link></td>
-              <td><button type="button" onClick={() => updateUser(user.email, user.name)}>改名</button></td>
-              <td><button type="button" onClick={() => deleteUser(user.email)}>删除</button></td>
+          {dirs && Boolean(dirs.length) && dirs.map((dir) =>
+            <tr key={dir.pk}>
+              <td><Link href={`/${getId(dir.pk)}`}>{dir.dirName}</Link></td>
+              <td>{toLocaleDateTime(dir.updateTimestamp)}</td>
+              <td><button type="button" onClick={() => openUpdateDir(getId(dir.pk), dir.dirName)}>改名</button></td>
+              <td><button type="button" onClick={() => openDeleteDir(getId(dir.pk), dir.dirName)}>删除</button></td>
             </tr>
           )}
         </tbody>
       </table>
+
+      <CreateDirDialogue isOpen={isCreateDir} onClose={() => setIsCreateDir(false)}
+        onCreate={handelCreate} hasError={hasWriteError} disabled={disabled}
+      />
+      <UpdateDirDialogue id={updateDirId} dirName={updateDirName} onClose={closeUpdateDir}
+        onUpdate={handelUpdate} hasError={hasWriteError} disabled={disabled}
+      />
+      <DeleteDirDialogue id={deleteDirId} dirName={deleteDirName} onClose={closeDeleteDir}
+        onDelete={handelDelete} hasError={hasWriteError} disabled={disabled}
+      />
     </>
   )
 }

@@ -1,6 +1,6 @@
-import DiaryNew from "@/app/components/diary_new"
+import ArticleNew from "@/app/components/article_new"
 
-export default async function NewDiary({ params }) {
+export default async function NewArticle({ params }) {
   const { pk } = await params
-  return <DiaryNew pk={pk} />
+  return <ArticleNew pk={pk} />
 }

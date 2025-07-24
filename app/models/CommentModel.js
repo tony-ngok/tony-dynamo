@@ -1,7 +1,7 @@
 import dynamoose from 'dynamoose'
 import { TableName } from './_dynamooseConfig'
 
-const DirSchema = new dynamoose.Schema({
+const CommentSchema = new dynamoose.Schema({
   pk: {
     type: String,
     hashKey: true
@@ -26,11 +26,13 @@ const DirSchema = new dynamoose.Schema({
   dirName: String
 }, {
   timestamps: {
-    createdAt: { createTimestamp: Number },
-    updatedAt: { updateTimestamp: Number }
+    timestamps: {
+      createdAt: { createTimestamp: Number },
+      updatedAt: { updateTimestamp: Number }
+    }
   }
 })
 
-const DirModel = dynamoose.model("Dir", DirSchema)
-const _ = new dynamoose.Table(TableName, [DirModel])
-export default DirModel
+const CommentModel = dynamoose.model("Comment", CommentSchema)
+const _ = new dynamoose.Table(TableName, [CommentModel])
+export default CommentModel

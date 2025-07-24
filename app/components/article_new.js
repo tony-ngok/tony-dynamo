@@ -5,7 +5,7 @@ import { redirect } from "next/navigation"
 import { useState } from "react"
 import Editor from "../lexical_editor/editor"
 
-export default function DiaryNew({ pk, dirId }) {
+export default function ArticleNew({ pk, dirId }) {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [htmlContent, setHtmlContent] = useState("")
@@ -17,7 +17,7 @@ export default function DiaryNew({ pk, dirId }) {
     setCreateError(false)
     setDisabled(true)
 
-    const res = await fetch('/api/diarys', {
+    const res = await fetch('/api/articles', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

@@ -1,19 +1,17 @@
-import DiaryModel from "@/app/models/DiaryModel"
 import DirModel from "@/app/models/DirModel"
-import { apiString, emailValidate } from "@/app/utils"
-import * as uuid from "uuid"
+import RelationModel from "@/app/models/RelationModel"
+import { apiString } from "@/app/string_utils"
+import { nanoid } from "nanoid"
 
 export async function GET(request) {
   const url = new URL(request.url)
-  let email = decodeURIComponent(url.searchParams.get('email') || "")
-  const sort = url.searchParams.get('sort') || 'ascending'
-  if (!emailValidate(email) || (sort !== 'ascending' && sort !== 'descending')) {
+  const sort = url.searchParams.get('sort') || 'descending'
+  if (sort !== 'ascending' && sort !== 'descending') {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
   try {
-    const res = await DirModel.query().where('GSI1PK').eq(`DIR#EMAIL#${email}`)
-      .using('nameIndex').sort(sort).exec()
+    const res = await DirModel.query().where('GSI1PK').eq('DIR').using('SortIndex').sort(sort).exec()
     // console.log(res)
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
@@ -30,23 +28,34 @@ export async function POST(request) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
-  const email = apiString(data.email)
   const dirName = apiString(data.dirName)
-  if (!(emailValidate(email) && dirName)) {
+  if (!dirName) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
   try {
-    const id = uuid.v4()
+    const id = nanoid()
+    const dir = await DirModel.get({ pk: `DIR#${id}`, sk: "DIR" })
+    if (dir) {
+      return Response.json({ error: "ID conflict, please try again" }, { status: 409 })
+    }
+
+    const rel = await RelationModel.query().where('sk').eq(`DIRNAME#${dirName}`).exec()
+    // console.log(rel)
+    if (rel.count) {
+      return Response.json({ error: "DirName already exists" }, { status: 409 })
+    }
+    await RelationModel.create({ pk: `DIR#${id}`, sk: `DIRNAME#${dirName}` })
+
     const res = await DirModel.create({
       pk: `DIR#${id}`,
-      sk: `DIR#${id}`,
-      GSI1PK: `DIR#EMAIL#${email}`,
-      GSI1SK: `DIRNAME#${dirName}`,
+      sk: `DIR`,
+      GSI1PK: "DIR",
+      GSI1SK: (new Date()).getTime(),
       dirName: dirName
     })
     // console.log(res)
-    return Response.json({ data: res }, { status: 200 })
+    return Response.json({ data: res }, { status: 201 })
   } catch (err) {
     // console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
@@ -63,19 +72,29 @@ export async function PATCH(request) {
 
   const id = apiString(data.id)
   const dirName = apiString(data.dirName)
-  if (!(id && dirName)) {
+  const newDirName = apiString(data.newDirName)
+  if (!(id && dirName && newDirName)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
+  } else if (dirName === newDirName) {
+    return Response.json({ message: "DirName not changed" }, { status: 200 })
   }
-  const pk = `DIR#${id}`
 
   try {
-    const res = await DirModel.update({ pk: pk, sk: pk }, {
-      dirName: dirName, GSI1SK: `DIRNAME#${dirName}`
+    const rel = await RelationModel.query().where('sk').eq(`DIRNAME#${newDirName}`).exec()
+    console.log(rel)
+    if (rel.count) {
+      return Response.json({ error: "DirName already exists" }, { status: 409 })
+    }
+    await RelationModel.delete({ pk: `DIR#${id}`, sk: `DIRNAME#${dirName}` })
+    await RelationModel.create({ pk: `DIR#${id}`, sk: `DIRNAME#${newDirName}` })
+
+    const res = await DirModel.update({ pk: `DIR#${id}`, sk: "DIR" }, {
+      dirName: newDirName, GSI1SK: (new Date()).getTime()
     })
-    // console.log(res)
+    console.log(res)
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
-    // console.log(err)
+    console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
   }
 }
@@ -88,30 +107,30 @@ export async function DELETE(request) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
-  const email = apiString(data.email)
   const id = apiString(data.id)
-  if (!(emailValidate(email) && id)) {
+  const dirName = apiString(data.dirName)
+  if (!(id && dirName)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
-  const pk = `DIR#${id}`
-  const dir_gsi1pk = `AUTOR#EMAIL#${email}#` + pk
 
   try {
-    const res_pk = await DiaryModel.query().where('GSI1PK').eq(dir_gsi1pk).exec()
-    // console.log(res_pk)
-    if (res_pk.count) {
-      const pksks = res_pk.map(i => ({
-        pk: i.pk,
-        sk: i.sk
-      }))
-      // console.log(pksks)
-      await DiaryModel.batchDelete(pksks)
-    }
+    // 待完成：先删干净关联的项目
+    // const res_pk = await ArticleModel.query().where('GSI1PK').eq(dir_gsi1pk).exec()
+    // // console.log(res_pk)
+    // if (res_pk.count) {
+    //   const pksks = res_pk.map(i => ({
+    //     pk: i.pk,
+    //     sk: i.sk
+    //   }))
+    //   // console.log(pksks)
+    //   await ArticleModel.batchDelete(pksks)
+    // }
 
-    await DirModel.delete({ pk: pk, sk: pk })
+    await RelationModel.delete({ pk: `DIR#${id}`, sk: `DIRNAME#${dirName}` })
+    await DirModel.delete({ pk: `DIR#${id}`, sk: "DIR" })
     return Response.json({ message: "Delete complete" }, { status: 200 })
   } catch (err) {
-    // console.log(err)
+    console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
   }
 }

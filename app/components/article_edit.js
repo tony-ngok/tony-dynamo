@@ -5,7 +5,7 @@ import { redirect } from "next/navigation"
 import { useEffect, useState } from "react"
 import Editor from "../lexical_editor/editor"
 
-export default function DiaryEdit({ pk, dirId, id }) {
+export default function ArticleEdit({ pk, dirId, id }) {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState(undefined)
   const [htmlContent, setHtmlContent] = useState(undefined)
@@ -13,10 +13,10 @@ export default function DiaryEdit({ pk, dirId, id }) {
   const [disabled, setDisabled] = useState(false)
 
   useEffect(() => {
-    async function getDiary() {
-      const res_diary = await fetch(`/api/diary?id=${id}`)
-      if (res_diary.ok) {
-        const res_data = (await res_diary.json()).data
+    async function getArticle() {
+      const res_article = await fetch(`/api/article?id=${id}`)
+      if (res_article.ok) {
+        const res_data = (await res_article.json()).data
         setTitle(res_data.title)
         setContent(res_data.content)
         setHtmlContent(res_data.htmlContent)
@@ -24,7 +24,7 @@ export default function DiaryEdit({ pk, dirId, id }) {
         setHasError(1)
       }
     }
-    getDiary()
+    getArticle()
   }, [])
 
   const handelSubmit = async (e) => {
@@ -32,7 +32,7 @@ export default function DiaryEdit({ pk, dirId, id }) {
     setHasError(0)
     setDisabled(true)
 
-    const res = await fetch('/api/diarys', {
+    const res = await fetch('/api/articles', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

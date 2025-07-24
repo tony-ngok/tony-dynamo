@@ -1,6 +1,6 @@
-import DiaryEdit from "@/app/components/diary_edit"
+import ArticleEdit from "@/app/components/article_edit"
 
 export default async function IdEdit({ params }) {
   const { pk, id } = await params
-  return <DiaryEdit pk={pk} id={id} />
+  return <ArticleEdit pk={pk} id={id} />
 }

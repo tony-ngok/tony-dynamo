@@ -1,7 +1,7 @@
 import dynamoose from 'dynamoose'
 import { TableName } from './_dynamooseConfig'
 
-const DirSchema = new dynamoose.Schema({
+const RelationSchema = new dynamoose.Schema({
   pk: {
     type: String,
     hashKey: true
@@ -22,8 +22,7 @@ const DirSchema = new dynamoose.Schema({
       rangeKey: 'GSI1SK'
     }
   },
-  GSI1SK: Number,
-  dirName: String
+  GSI1SK: Number
 }, {
   timestamps: {
     createdAt: { createTimestamp: Number },
@@ -31,6 +30,6 @@ const DirSchema = new dynamoose.Schema({
   }
 })
 
-const DirModel = dynamoose.model("Dir", DirSchema)
-const _ = new dynamoose.Table(TableName, [DirModel])
-export default DirModel
+const RelationModel = dynamoose.model("Relation", RelationSchema)
+const _ = new dynamoose.Table(TableName, [RelationModel])
+export default RelationModel

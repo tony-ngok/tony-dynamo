@@ -3,12 +3,12 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
-export default function DiaryView({ pk, dirId }) {
+export default function ArticleView({ pk, dirId }) {
   const [disabled, setDisabled] = useState(true)
   const [hasError, setHasError] = useState(false)
   const [userPk, setUserPk] = useState(undefined)
   const [dirs, setDirs] = useState(undefined)
-  const [diarys, setDiarys] = useState(undefined)
+  const [articles, setArticles] = useState(undefined)
   const [isDesc, setIsDesc] = useState(false)
   const [actual, setActual] = useState(null)
 
@@ -28,7 +28,7 @@ export default function DiaryView({ pk, dirId }) {
   }, [])
 
   useEffect(() => {
-    async function getDiarys() {
+    async function getArticles() {
       const sort = isDesc ? 'descending' : 'ascending'
 
       if (!dirId) {
@@ -42,33 +42,33 @@ export default function DiaryView({ pk, dirId }) {
         }
       }
 
-      let diaryUrl = `/api/diarys?email=${pk}&sort=${sort}`
-      if (dirId) diaryUrl += `&dir=${dirId}`
-      const res1 = await fetch(diaryUrl)
+      let articleUrl = `/api/articles?email=${pk}&sort=${sort}`
+      if (dirId) articleUrl += `&dir=${dirId}`
+      const res1 = await fetch(articleUrl)
       if (res1.ok) {
         const res1_json = await res1.json()
-        setDiarys(res1_json.data)
+        setArticles(res1_json.data)
         setDisabled(false)
       } else {
         setHasError(true)
       }
     }
 
-    if (userPk) { getDiarys() }
+    if (userPk) { getArticles() }
   }, [userPk, isDesc])
 
-  const deleteDiary = async (diary) => {
-    if (!confirm(`删除日记：${diary.title}？`)) return
+  const deleteArticle = async (article) => {
+    if (!confirm(`删除日记：${article.title}？`)) return
 
     setDisabled(true)
-    const res = await fetch("/api/diarys", {
+    const res = await fetch("/api/articles", {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: diary.sk.split('#')[1] })
+      body: JSON.stringify({ id: article.sk.split('#')[1] })
     })
     if (res.ok) {
-      if (actual && (actual.sk === diary.sk)) { setActual(null) }
-      setDiarys(diarys.filter(d => d.sk !== diary.sk))
+      if (actual && (actual.sk === article.sk)) { setActual(null) }
+      setArticles(articles.filter(d => d.sk !== article.sk))
     } else {
       alert("删除日记失败")
     }
@@ -171,7 +171,7 @@ export default function DiaryView({ pk, dirId }) {
         <Link href={(dirId ? `/${pk}/dir/${dirId}` : `/${pk}`) + '/new'}>写日记</Link>
         {dirId ? <Link href={`/${pk}`}>后退</Link> : <button type="button" onClick={newDir}>建立收藏</button>}
         { }
-        {diarys && Boolean(diarys.length) &&
+        {articles && Boolean(articles.length) &&
           <label>
             <input type="checkbox" checked={isDesc} onChange={() => setIsDesc(!isDesc)} disabled={disabled} />
             名称降序排列
@@ -201,24 +201,24 @@ export default function DiaryView({ pk, dirId }) {
             </tr>
           )}
 
-          {diarys && Boolean(diarys.length) && diarys.map((diary) =>
-            <tr key={diary.sk.split('#')[1]}>
+          {articles && Boolean(articles.length) && articles.map((article) =>
+            <tr key={article.sk.split('#')[1]}>
               <td>
                 <Link href=""
                   onClick={(e) => {
                     e.preventDefault()
-                    setActual(diary)
+                    setActual(article)
                   }}>
-                  {diary.title}
+                  {article.title}
                 </Link>
               </td>
               {!dirId && <td>日记</td>}
               <td>
-                <Link href={(dirId ? `/${pk}/dir/${dirId}` : `/${pk}`) + `/${diary.sk.split('#')[1]}/edit`}>
+                <Link href={(dirId ? `/${pk}/dir/${dirId}` : `/${pk}`) + `/${article.sk.split('#')[1]}/edit`}>
                   修改
                 </Link>
               </td>
-              <td><button type="button" onClick={() => deleteDiary(diary)}>删除</button></td>
+              <td><button type="button" onClick={() => deleteArticle(article)}>删除</button></td>
             </tr>
           )}
         </tbody>

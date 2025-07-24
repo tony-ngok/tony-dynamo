@@ -1,17 +1,21 @@
-import UserModel from "@/app/models/UserModel"
-import DiaryModel from "@/app/models/DiaryModel"
-import { apiString, emailValidate } from "@/app/utils"
-import DirModel from "@/app/models/DirModel"
+import ArticleModel from "@/app/models/ArticleModel"
+import { apiString, emailValidate } from "@/app/string_utils"
+import * as uuid from "uuid"
 
 export async function GET(request) {
   const url = new URL(request.url)
+  let email = decodeURIComponent(url.searchParams.get('email') || "")
   const sort = url.searchParams.get('sort') || 'ascending'
-  if (sort !== 'ascending' && sort !== 'descending') {
+  if (!emailValidate(email) || (sort !== 'ascending' && sort !== 'descending')) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
   try {
-    const res = await UserModel.query().where('GSI1PK').eq('USER').using('nameIndex').sort(sort).exec()
+    const dir = url.searchParams.get('dir')
+    const gsisk = dir ? `DIR#${dir}#ARTICLE` : "ARTICLE"
+
+    const res = await ArticleModel.query().where('GSI1PK').eq(`AUTOR#EMAIL#${email}`)
+      .where('GSI1SK').beginsWith(gsisk).using('SortIndex').sort(sort).exec()
     // console.log(res)
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
@@ -29,27 +33,31 @@ export async function POST(request) {
   }
 
   const email = apiString(data.email)
-  const name = apiString(data.name)
-  if (!(emailValidate(email) && name)) {
+  const title = apiString(data.title)
+  const content = apiString(data.content)
+  const htmlContent = apiString(data.htmlContent)
+  if (!(emailValidate(email) && title && content && htmlContent)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
   try {
-    const res = await UserModel.create({
-      pk: `USER#EMAIL#${email}`,
-      sk: `USER#EMAIL#${email}`,
-      GSI1PK: "USER",
-      GSI1SK: `NAME#${name}`,
-      email: email,
-      name: name
+    const dir = apiString(data.dir)
+    const gsis1k = (dir ? `DIR#${dir}#ARTICLE` : "ARTICLE") + `#TITLE#${title}`
+
+    const id = uuid.v4()
+    const res = await ArticleModel.create({
+      pk: `ARTICLE#${id}`,
+      sk: `ARTICLE#${id}`,
+      GSI1PK: `AUTOR#EMAIL#${email}`,
+      GSI1SK: gsis1k,
+      title: title,
+      content: content,
+      htmlContent: htmlContent
     })
     // console.log(res)
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
     // console.log(err)
-    if (err.name === 'ConditionalCheckFailedException') {
-      return Response.json({ error: err.toString() }, { status: 412 })
-    }
     return Response.json({ error: err.toString() }, { status: 500 })
   }
 }
@@ -62,15 +70,22 @@ export async function PATCH(request) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
-  const email = apiString(data.email)
-  const name = apiString(data.name)
-  if (!(emailValidate(email) && name)) {
+  const id = apiString(data.id)
+  const title = apiString(data.title)
+  const content = apiString(data.content)
+  const htmlContent = apiString(data.htmlContent)
+  if (!(id && title && content && htmlContent)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
-  const pk = `USER#EMAIL#${email}`
+  const pk = `ARTICLE#${id}`
 
   try {
-    const res = await UserModel.update({ pk: pk, sk: pk }, { GSI1SK: `NAME#${name}`, name: name })
+    const dir = apiString(data.dir)
+    const gsis1k = (dir ? `DIR#${dir}#ARTICLE` : "ARTICLE") + `#TITLE#${title}`
+
+    const res = await ArticleModel.update({ pk: pk, sk: pk }, {
+      content: content, htmlContent: htmlContent, title: title, GSI1SK: gsis1k
+    })
     // console.log(res)
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
@@ -87,37 +102,14 @@ export async function DELETE(request) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
-  const email = apiString(data.email)
-  if (!emailValidate(email)) {
+  const id = apiString(data.id)
+  if (!id) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
+  const pk = `ARTICLE#${id}`
 
   try {
-    const res_pk = await DiaryModel.query().where('GSI1PK').eq(`AUTOR#EMAIL#${email}`).exec()
-    // console.log(res_pk)
-    if (res_pk.count) {
-      const pksks = res_pk.map(i => ({
-        pk: i.pk,
-        sk: i.sk
-      }))
-      // console.log(pksks)
-      await DiaryModel.batchDelete(pksks)
-    }
-
-    const res_dirs = await DirModel.query().where('GSI1PK').eq(`DIR#EMAIL#${email}`).exec()
-    // console.log(res_dirs)
-    if (res_dirs.count) {
-      const pksks_dirs = res_dirs.map(i => ({
-        pk: i.pk,
-        sk: i.sk
-      }))
-      // console.log(pksks_dirs)
-      await DirModel.batchDelete(pksks_dirs)
-    }
-
-    const pk = `USER#EMAIL#${email}`
-    await UserModel.delete({ pk: pk, sk: pk })
-
+    await ArticleModel.delete({ pk: pk, sk: pk })
     return Response.json({ message: "Delete complete" }, { status: 200 })
   } catch (err) {
     // console.log(err)
