@@ -29,6 +29,7 @@ export function UpdateDirDialogue({ id, dirName, onClose, onUpdate, hasError, di
         <div>当前目录名称：{dirName}</div>
         <div>请输入新的目录名称：</div>
         {hasError && <p style={{ color: "red" }}>出错了，请再试</p>}
+
         <form onSubmit={handelSubmit}>
           <input value={newDirName} onChange={(e) => setNewDirName(e.target.value)} ref={inputRef} required />
           <div className="btns">

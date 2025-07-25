@@ -6,12 +6,11 @@ export async function GET(request) {
   if (!id) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
-  const pk = `ARTICLE#${id}`
 
   try {
-    const res = await ArticleModel.get({ pk: pk, sk: pk })
+    const res = await ArticleModel.get({ pk: `ARTICLE#${id}`, sk: `ARTICLE#${id}` })
     if (!res) {
-      return Response.json({ error: "Article not found for this user" }, { status: 404 })
+      return Response.json({ error: "Article not found" }, { status: 404 })
     }
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {

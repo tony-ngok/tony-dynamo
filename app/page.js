@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import Info from "./components/info"
 import { getId, toLocaleDateTime } from "./string_utils"
 import { CreateDirDialogue } from "./components/dialogues/create_dir"
 import { UpdateDirDialogue } from "./components/dialogues/update_dir"
@@ -22,6 +21,8 @@ export default function App() {
 
   useEffect(() => {
     async function getDirs() {
+      setDisabled(true)
+
       const sort = isAsc ? 'ascending' : 'descending'
       const res = await fetch(`/api/dirs?sort=${sort}`)
       if (res.ok) {
@@ -130,11 +131,10 @@ export default function App() {
     setDisabled(false)
   }
 
-  if (hasReadError) return <div>出错了，刷新一下吧</div>
+  if (hasReadError) return <div style={{ color: "red" }}>出错了，刷新一下吧</div>
 
   return (
     <>
-      <Info />
       <h1>全部目录</h1>
       <div>
         写文章前，请先创建并进入一个目录；也可以直接进入一个已有的目录写文章。
@@ -142,7 +142,7 @@ export default function App() {
         <strong>注意：如果删了一个目录，里面的文章就全都没了。</strong>
       </div>
 
-      <nav>
+      <nav className="navbar">
         <button type="button" onClick={openCreateDir} disabled={disabled}>新建目录</button>
         <label>
           <input type="checkbox" checked={isAsc} onChange={() => setIsAsc(!isAsc)} disabled={disabled} />
@@ -164,8 +164,20 @@ export default function App() {
             <tr key={dir.pk}>
               <td><Link href={`/${getId(dir.pk)}`}>{dir.dirName}</Link></td>
               <td>{toLocaleDateTime(dir.updateTimestamp)}</td>
-              <td><button type="button" onClick={() => openUpdateDir(getId(dir.pk), dir.dirName)}>改名</button></td>
-              <td><button type="button" onClick={() => openDeleteDir(getId(dir.pk), dir.dirName)}>删除</button></td>
+              <td>
+                <button type="button" disabled={disabled}
+                  onClick={() => openUpdateDir(getId(dir.pk), dir.dirName)}
+                >
+                  改名
+                </button>
+              </td>
+              <td>
+                <button type="button" disabled={disabled}
+                  onClick={() => openDeleteDir(getId(dir.pk), dir.dirName)}
+                >
+                  删除
+                </button>
+              </td>
             </tr>
           )}
         </tbody>

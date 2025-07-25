@@ -15,7 +15,7 @@ import { useState } from 'react'
 import FloatLinkEditorPlugin from './plugins/float_link_editor'
 import FloatFormatBarPlugin from './plugins/float_format_bar'
 
-export default function Editor({ initContent, setContent, setHtmlContent, editable = true, isError = false }) {
+export default function Editor({ initContent, setContent, setHtmlContent, editable = true }) {
   const [floatAnchorElem, setFloatAnchorElem] = useState(null)
 
   const initConfig = {
@@ -25,19 +25,6 @@ export default function Editor({ initContent, setContent, setHtmlContent, editab
     theme: editorTheme,
     nodes: editorNodes,
     onError: (err) => { throw err }
-  }
-
-  const placeholderStyle = {
-    color: "#999",
-    overflow: "hidden",
-    position: "absolute",
-    top: isError ? "175px" : "153px",
-    left: "10px",
-    textOverflow: "ellipsis",
-    userSelect: "none",
-    whiteSpace: "nowrap",
-    display: "inline-block",
-    pointerEvents: "none"
   }
 
   // https://zh-hans.react.dev/reference/react-dom/components/common#ref-callback
@@ -68,7 +55,6 @@ export default function Editor({ initContent, setContent, setHtmlContent, editab
           </div>
         }
         ErrorBoundary={LexicalErrorBoundary}
-        placeholder={<div style={placeholderStyle}>在此写日记...</div>}
       />
       <LinkPlugin />
       <ListPlugin />

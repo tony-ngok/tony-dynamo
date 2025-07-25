@@ -28,6 +28,7 @@ export function CreateDirDialogue({ isOpen, onClose, onCreate, hasError, disable
       <dialog className="dialog fixed center-align">
         <div>请输入目录名称：</div>
         {hasError && <p style={{ color: "red" }}>出错了，请再试</p>}
+
         <form onSubmit={handelSubmit}>
           <input value={dirName} onChange={(e) => setDirName(e.target.value)} ref={inputRef} required />
           <div className="btns">

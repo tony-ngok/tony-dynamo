@@ -8,7 +8,7 @@ export async function GET(request) {
   }
 
   try {
-    const res = await DirModel.get({ pk: `DIR#${id}`, sk: 'DIR' })
+    const res = await DirModel.get({ pk: `DIR#${id}`, sk: `DIR#${id}` })
     // console.log(res)
     if (!res) {
       return Response.json({ error: "Dir not found" }, { status: 404 })

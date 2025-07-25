@@ -56,3 +56,7 @@ dialog.fixed {
 .btn:not(:last-of-type) {
   margin-right: 6px
 }
+
+.navbar>*:not(:last-child) {
+  margin-right: 4px
+}
