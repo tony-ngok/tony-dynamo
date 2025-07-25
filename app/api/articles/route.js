@@ -92,10 +92,10 @@ export async function PATCH(request) {
     const res = await ArticleModel.update({ pk: `ARTICLE#${id}`, sk: `ARTICLE#${id}` }, {
       content: content, htmlContent: htmlContent, title: title, GSI1SK: (new Date()).getTime()
     })
-    console.log(res)
+    // console.log(res)
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
-    console.log(err)
+    // console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
   }
 }

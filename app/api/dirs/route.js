@@ -1,4 +1,5 @@
 import ArticleModel from "@/app/models/ArticleModel"
+import CommentModel from "@/app/models/CommentModel"
 import DirModel from "@/app/models/DirModel"
 import RelationModel from "@/app/models/RelationModel"
 import { apiString } from "@/app/string_utils"
@@ -119,25 +120,37 @@ export async function DELETE(request) {
   }
 
   try {
-    const oldDir = await DirModel.get({ pk: `DIR#${id}`, sk: `DIR#${id}` })
-    if (!oldDir) {
-      return Response.json({ error: "Dir not found" }, { status: 404 })
+    const del_pksks = []
+
+    const comments = await RelationModel.query().where('sk').eq(`DIR#${id}`)
+      .where('pk').beginsWith('COMMENT#').exec()
+
+
+    // console.log(comments)
+    for (const comment of comments) {
+      del_pksks.push({ pk: comment.pk, sk: comment.sk })
     }
 
-    // 待完成：先删干净关联的项目
     const articles = await ArticleModel.query().where('GSI1PK').eq(`DIR#${id}`).exec()
     // console.log(articles)
-    if (articles.count) {
-      const articles_pksks = articles.map(i => ({
-        pk: i.pk,
-        sk: i.sk
-      }))
-      // console.log(articles_pksks)
-      await ArticleModel.batchDelete(articles_pksks)
+    for (const article of articles) {
+      del_pksks.push({ pk: article.pk, sk: article.sk })
     }
+    // console.log(articles_pksks)
+    // await ArticleModel.batchDelete(articles_pksks)
+    // }
 
-    await RelationModel.delete({ pk: `DIR#${id}`, sk: `DIRNAME#${oldDir.dirName}` })
-    await DirModel.delete({ pk: `DIR#${id}`, sk: `DIR#${id}` })
+    // const del_items = await RelationModel.query().where('pk').eq(`DIR#${id}`).exec()
+    // // console.log(del_items)
+    // if (del_items.count) {
+    //   const del_pksks = del_items.map(i => ({
+    //     pk: i.pk,
+    //     sk: i.sk
+    //   }))
+    console.log(del_pksks)
+    // await RelationModel.batchDelete(del_pksks)
+    // }
+
     return Response.json({ message: "Delete complete" }, { status: 200 })
   } catch (err) {
     console.log(err)
