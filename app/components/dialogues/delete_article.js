@@ -1,6 +1,6 @@
 "use client"
 
-export function DeleteArticleDialogue({ id, title, updateTime, onClose, onDelete, hasError, disabled }) {
+export default function DeleteArticleDialogue({ id, title, updateTime, onClose, onDelete, hasError, disabled }) {
   const handelDelete = async () => {
     await onDelete({ id: id })
   }

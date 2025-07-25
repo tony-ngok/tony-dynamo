@@ -1,6 +1,6 @@
 "use client"
 
-export function DeleteDirDialogue({ id, dirName, onClose, onDelete, hasError, disabled }) {
+export default function DeleteDirDialogue({ id, dirName, onClose, onDelete, hasError, disabled }) {
   const handelDelete = async () => {
     await onDelete({ id: id })
   }

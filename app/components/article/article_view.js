@@ -3,11 +3,15 @@
 import { toLocaleDateTime } from "@/app/string_utils"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import CommentForm from "../comments/comment_form"
+import CommentTable from "../comments/comment_table"
 
 export default function ArticleView({ dirId, id }) {
   const [article, setArticle] = useState(undefined)
   const [dirName, setDirName] = useState("")
   const [readError, setReadError] = useState(0)
+  const [disabled, setDisabled] = useState(false)
+  const [comments, setComments] = useState(undefined)
 
   useEffect(() => {
     async function loadDir() {
@@ -43,6 +47,14 @@ export default function ArticleView({ dirId, id }) {
     if (!readError && dirName) { getArticle() }
   }, [dirName, id])
 
+  const handelComment = async (data) => {
+
+  }
+
+  const handelDeleteComment = async (data) => {
+
+  }
+
   if (!(dirId && id)) return null
   if (readError === 1) return <div style={{ color: "red" }}>出错了，刷新一下吧</div>
 
@@ -72,6 +84,9 @@ export default function ArticleView({ dirId, id }) {
       <h1>{article.title}</h1>
       <div>最终更新时间：{toLocaleDateTime(article.updateTimestamp)}</div>
       <div dangerouslySetInnerHTML={{ __html: article.htmlContent }} />
+      <hr />
+      <CommentForm articleId={id} disabled={disabled} onCreate={handelComment} />
+      <CommentTable comments={comments} disabled={disabled} />
     </>
   )
 }

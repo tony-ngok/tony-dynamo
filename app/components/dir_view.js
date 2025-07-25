@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { getId, toLocaleDateTime } from "../string_utils"
 import ButtonLink from "./button_link"
-import { DeleteArticleDialogue } from "./dialogues/delete_article"
+import DeleteArticleDialogue from "./dialogues/delete_article"
 
 export default function DirView({ dirId }) {
   const [disabled, setDisabled] = useState(true)

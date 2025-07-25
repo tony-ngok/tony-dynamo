@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 
-export function UpdateDirDialogue({ id, dirName, onClose, onUpdate, hasError, disabled }) {
+export default function UpdateDirDialogue({ id, dirName, onClose, onUpdate, hasError, disabled }) {
   const [newDirName, setNewDirName] = useState(dirName)
   const inputRef = useRef(null)
 
