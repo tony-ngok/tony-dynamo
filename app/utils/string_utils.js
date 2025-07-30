@@ -11,8 +11,16 @@ export function getId(key) {
 }
 
 export function toLocaleDateTime(timestamp) {
-  const dateObj = new Date(timestamp)
-  return `${dateObj.toLocaleDateString()} ${dateObj.toLocaleTimeString()}`
+  const date = new Date(timestamp)
+
+  const yyyy = date.getFullYear()
+  const mm = (date.getMonth() + 1).toString().padStart(2, '0')
+  const dd = date.getDate().toString().padStart(2, '0')
+  const hh = date.getHours().toString().padStart(2, '0')
+  const mi = date.getMinutes().toString().padStart(2, '0')
+  const ss = date.getSeconds().toString().padStart(2, '0')
+
+  return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`
 }
 
 export function htmlText(htmlString) {

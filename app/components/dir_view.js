@@ -2,9 +2,9 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { getId, toLocaleDateTime } from "../string_utils"
+import { getId, toLocaleDateTime } from "../utils/string_utils"
 import ButtonLink from "./button_link"
-import { DeleteArticleDialogue } from "./dialogues/delete_article"
+import DeleteArticleDialogue from "./dialogues/delete_article"
 
 export default function DirView({ dirId }) {
   const [disabled, setDisabled] = useState(true)
@@ -141,8 +141,9 @@ export default function DirView({ dirId }) {
             </tbody>
           </table>
 
-          <DeleteArticleDialogue id={deleteArticleId} title={deleteArticleTitle}
-            updateTime={deleteArticleUpdateTime} onClose={closeDeleteArticle} onDelete={handelDelete}
+          <DeleteArticleDialogue id={deleteArticleId} dirId={dirId}
+            title={deleteArticleTitle} updateTime={deleteArticleUpdateTime}
+            onClose={closeDeleteArticle} onDelete={handelDelete}
             hasError={hasDeleteError} disabled={disabled}
           />
         </>

@@ -1,8 +1,9 @@
 "use client"
 
-import { toLocaleDateTime } from "@/app/string_utils"
+import { toLocaleDateTime } from "@/app/utils/string_utils"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import CommentTable from "../comments/comment_table"
 
 export default function ArticleView({ dirId, id }) {
   const [article, setArticle] = useState(undefined)
@@ -40,7 +41,7 @@ export default function ArticleView({ dirId, id }) {
         setReadError(1)
       }
     }
-    if (!readError && dirName) { getArticle() }
+    if (!readError && dirName && id) { getArticle() }
   }, [dirName, id])
 
   if (!(dirId && id)) return null
@@ -72,6 +73,8 @@ export default function ArticleView({ dirId, id }) {
       <h1>{article.title}</h1>
       <div>最终更新时间：{toLocaleDateTime(article.updateTimestamp)}</div>
       <div dangerouslySetInnerHTML={{ __html: article.htmlContent }} />
+      <hr />
+      {!readError && article && <CommentTable dirId={dirId} articleId={id} setReadError={setReadError} />}
     </>
   )
 }

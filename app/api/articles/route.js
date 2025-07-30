@@ -1,6 +1,9 @@
 import ArticleModel from "@/app/models/ArticleModel"
+import CommentModel from "@/app/models/CommentModel"
 import DirModel from "@/app/models/DirModel"
-import { apiString, htmlText } from "@/app/string_utils"
+import RelationModel from "@/app/models/RelationModel"
+import { gsiQueryAll, sliceBatchDelete } from "@/app/utils/db_utils"
+import { apiString, getId, htmlText } from "@/app/utils/string_utils"
 import { nanoid } from "nanoid"
 
 export async function GET(request) {
@@ -39,8 +42,8 @@ export async function POST(request) {
   }
 
   try {
-    const id = nanoid()
-    const article = await ArticleModel.get({ pk: `ARTICLE#${id}`, sk: `ARTICLE#${id}` })
+    const articlePk = `ARTICLE#${nanoid()}`
+    const article = await ArticleModel.get({ pk: articlePk, sk: articlePk })
     if (article) {
       return Response.json({ error: "ID conflict, please try again" }, { status: 409 })
     }
@@ -49,15 +52,24 @@ export async function POST(request) {
     if (!dir) {
       return Response.json({ error: "Dir not found" }, { status: 404 })
     }
+    await RelationModel.create({
+      pk: articlePk,
+      sk: 'RELATION',
+      GSI1PK: 'RELATION',
+      GSI1SK: `DIR#${dirId}#ARTICLE`
+    })
 
+    const createTimestamp = (new Date()).getTime()
     const res = await ArticleModel.create({
-      pk: `ARTICLE#${id}`,
-      sk: `ARTICLE#${id}`,
+      pk: articlePk,
+      sk: articlePk,
       GSI1PK: `DIR#${dirId}`,
-      GSI1SK: (new Date()).getTime(),
+      GSI1SK: createTimestamp.toString().padStart(13, '0'),
       title: title,
       content: content,
-      htmlContent: htmlContent
+      htmlContent: htmlContent,
+      createTimestamp: createTimestamp,
+      updateTimestamp: createTimestamp
     })
     // console.log(res)
     return Response.json({ data: res }, { status: 200 })
@@ -84,18 +96,24 @@ export async function PATCH(request) {
   }
 
   try {
-    const article = await ArticleModel.get({ pk: `ARTICLE#${id}`, sk: `ARTICLE#${id}` })
+    const articlePk = `ARTICLE#${nanoid()}`
+    const article = await ArticleModel.get({ pk: articlePk, sk: articlePk })
     if (!article) {
       return Response.json({ error: "Article not found" }, { status: 404 })
     }
 
-    const res = await ArticleModel.update({ pk: `ARTICLE#${id}`, sk: `ARTICLE#${id}` }, {
-      content: content, htmlContent: htmlContent, title: title, GSI1SK: (new Date()).getTime()
+    const updateTimestamp = (new Date()).getTime()
+    const res = await ArticleModel.update({ pk: articlePk, sk: articlePk }, {
+      content: content,
+      htmlContent: htmlContent,
+      title: title,
+      GSI1SK: updateTimestamp.toString().padStart(13, '0'),
+      updateTimestamp: updateTimestamp
     })
-    console.log(res)
+    // console.log(res)
     return Response.json({ data: res }, { status: 200 })
   } catch (err) {
-    console.log(err)
+    // console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
   }
 }
@@ -108,16 +126,42 @@ export async function DELETE(request) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
+  const dirId = apiString(data.dirId)
   const id = apiString(data.id)
-  if (!id) {
+  if (!(dirId && id)) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
   try {
-    await ArticleModel.delete({ pk: `ARTICLE#${id}`, sk: `ARTICLE#${id}` })
+    const articlePk = `ARTICLE#${id}`
+    const article = await ArticleModel.get({ pk: articlePk, sk: articlePk })
+    if (!(article && getId(article.GSI1PK) === dirId)) {
+      return Response.json({ message: "Article not found" }, { status: 404 })
+    }
+
+    // 清除留言与目录间的关系
+    const comms_rels_query = await gsiQueryAll(RelationModel, 'RELATION',
+      `DIR#${dirId}#${articlePk}#COMMENT`
+    )
+    console.log(comms_rels_query)
+
+    // 清除相关的留言
+    let comms_pksks = []
+    for (const rel of comms_rels_query) {
+      if (rel.pk.startsWith("COMMENT#")) {
+        comms_pksks.push({ pk: rel.pk, sk: rel.pk })
+      }
+    }
+    console.log(comms_pksks)
+
+    await sliceBatchDelete(RelationModel, comms_rels_query)
+    await sliceBatchDelete(CommentModel, comms_pksks, false)
+
+    await RelationModel.delete({ pk: articlePk, sk: 'RELATION' })
+    await article.delete()
     return Response.json({ message: "Delete complete" }, { status: 200 })
   } catch (err) {
-    console.log(err)
+    // console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
   }
 }

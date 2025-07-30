@@ -8,11 +8,7 @@ const RelationSchema = new dynamoose.Schema({
   },
   sk: {
     type: String,
-    rangeKey: true,
-    index: {
-      name: 'SearchIndex',
-      type: 'global'
-    }
+    rangeKey: true
   },
   GSI1PK: {
     type: String,
@@ -22,13 +18,17 @@ const RelationSchema = new dynamoose.Schema({
       rangeKey: 'GSI1SK'
     }
   },
-  GSI1SK: Number
-}, {
-  timestamps: {
-    createdAt: { createTimestamp: Number },
-    updatedAt: { updateTimestamp: Number }
-  }
-})
+  GSI1SK: String,
+  createTimestamp: Number,
+  updateTimestamp: Number
+},
+  // {
+  //   timestamps: {
+  //     createdAt: { createTimestamp: Number },
+  //     updatedAt: { updateTimestamp: Number }
+  //   }
+  // }
+)
 
 const RelationModel = dynamoose.model("Relation", RelationSchema)
 const _ = new dynamoose.Table(TableName, [RelationModel])

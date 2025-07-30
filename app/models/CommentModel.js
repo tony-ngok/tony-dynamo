@@ -8,11 +8,7 @@ const CommentSchema = new dynamoose.Schema({
   },
   sk: {
     type: String,
-    rangeKey: true,
-    index: {
-      name: 'SearchIndex',
-      type: 'global'
-    }
+    rangeKey: true
   },
   GSI1PK: {
     type: String,
@@ -22,16 +18,20 @@ const CommentSchema = new dynamoose.Schema({
       rangeKey: 'GSI1SK'
     }
   },
-  GSI1SK: Number,
-  dirName: String
-}, {
-  timestamps: {
-    timestamps: {
-      createdAt: { createTimestamp: Number },
-      updatedAt: { updateTimestamp: Number }
-    }
-  }
-})
+  GSI1SK: String,
+  text: String,
+  createTimestamp: Number,
+  updateTimestamp: Number
+},
+  // {
+  //   timestamps: {
+  //     timestamps: {
+  //       createdAt: { createTimestamp: Number },
+  //       updatedAt: { updateTimestamp: Number }
+  //     }
+  //   }
+  // }
+)
 
 const CommentModel = dynamoose.model("Comment", CommentSchema)
 const _ = new dynamoose.Table(TableName, [CommentModel])

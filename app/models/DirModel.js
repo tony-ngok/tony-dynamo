@@ -8,11 +8,7 @@ const DirSchema = new dynamoose.Schema({
   },
   sk: {
     type: String,
-    rangeKey: true,
-    index: {
-      name: 'SearchIndex',
-      type: 'global'
-    }
+    rangeKey: true
   },
   GSI1PK: {
     type: String,
@@ -22,14 +18,18 @@ const DirSchema = new dynamoose.Schema({
       rangeKey: 'GSI1SK'
     }
   },
-  GSI1SK: Number,
-  dirName: String
-}, {
-  timestamps: {
-    createdAt: { createTimestamp: Number },
-    updatedAt: { updateTimestamp: Number }
-  }
-})
+  GSI1SK: String,
+  dirName: String,
+  createTimestamp: Number,
+  updateTimestamp: Number
+},
+  // {
+  //   timestamps: {
+  //     createdAt: { createTimestamp: Number },
+  //     updatedAt: { updateTimestamp: Number }
+  //   }
+  // }
+)
 
 const DirModel = dynamoose.model("Dir", DirSchema)
 const _ = new dynamoose.Table(TableName, [DirModel])

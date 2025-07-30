@@ -23,7 +23,7 @@ export default function Editor({ initContent, setContent, setHtmlContent, editab
     editorState: initContent || '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""}],"direction":null,"format":"","indent":0,"type":"root","version":1}}',
     editable: editable,
     theme: editorTheme,
-    nodes: editorNodes,
+    nodes: [...editorNodes],
     onError: (err) => { throw err }
   }
 

@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { getId, toLocaleDateTime } from "./string_utils"
-import { CreateDirDialogue } from "./components/dialogues/create_dir"
-import { UpdateDirDialogue } from "./components/dialogues/update_dir"
-import { DeleteDirDialogue } from "./components/dialogues/delete_dir"
+import { getId, toLocaleDateTime } from "./utils/string_utils"
+import CreateDirDialogue from "./components/dialogues/create_dir"
+import UpdateDirDialogue from "./components/dialogues/update_dir"
+import DeleteDirDialogue from "./components/dialogues/delete_dir"
 
 export default function App() {
   const [disabled, setDisabled] = useState(true)
@@ -74,7 +74,7 @@ export default function App() {
       })
       if (res.ok) {
         const newDir = (await res.json()).data
-        setDirs([...dirs, newDir])
+        setDirs([newDir, ...dirs])
         setIsCreateDir(false)
       } else {
         setHasWriteError(true)

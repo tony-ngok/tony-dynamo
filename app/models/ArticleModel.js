@@ -8,11 +8,7 @@ const ArticleSchema = new dynamoose.Schema({
   },
   sk: {
     type: String,
-    rangeKey: true,
-    index: {
-      name: 'SearchIndex',
-      type: 'global'
-    }
+    rangeKey: true
   },
   GSI1PK: {
     type: String,
@@ -22,16 +18,20 @@ const ArticleSchema = new dynamoose.Schema({
       rangeKey: 'GSI1SK'
     }
   },
-  GSI1SK: Number,
+  GSI1SK: String,
   title: String,
   content: String,
-  htmlContent: String
-}, {
-  timestamps: {
-    createdAt: { createTimestamp: Number },
-    updatedAt: { updateTimestamp: Number }
-  }
-})
+  htmlContent: String,
+  createTimestamp: Number,
+  updateTimestamp: Number
+},
+  // {
+  //   timestamps: {
+  //     createdAt: { createTimestamp: Number },
+  //     updatedAt: { updateTimestamp: Number }
+  //   }
+  // }
+)
 
 const ArticleModel = dynamoose.model("Article", ArticleSchema)
 const _ = new dynamoose.Table(TableName, [ArticleModel])

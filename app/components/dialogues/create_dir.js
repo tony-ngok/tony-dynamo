@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 
-export function CreateDirDialogue({ isOpen, onClose, onCreate, hasError, disabled }) {
+export default function CreateDirDialogue({ isOpen, onClose, onCreate, hasError, disabled }) {
   const [dirName, setDirName] = useState("")
   const inputRef = useRef(null)
 

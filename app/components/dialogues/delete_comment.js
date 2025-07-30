@@ -1,19 +1,16 @@
-"use client"
-
-export default function DeleteDirDialogue({ id, dirName, onClose, onDelete, hasError, disabled }) {
+export default function DeleteCommentDialogue({ id, createTime, onClose, onDelete, disabled }) {
   const handelDelete = async () => {
     await onDelete({ id: id })
   }
 
-  if (!(id && dirName)) return null
+  if (!(id && createTime)) return null
 
   return (
     <>
       <div className="dialogue-backdrop" />
       <dialog className="dialog fixed center-align">
-        <div>目录名称：{dirName}</div>
-        <div>确定删除本目录？</div>
-        {hasError && <p style={{ color: "red" }}>出错了，请再试</p>}
+        <div>留言时间：{createTime}</div>
+        <div>确定删除本留言？</div>
 
         <div className="btns">
           <button type="button" onClick={handelDelete} className="btn" disabled={disabled}>删除</button>

@@ -1,11 +1,13 @@
 "use client"
 
-export function DeleteArticleDialogue({ id, title, updateTime, onClose, onDelete, hasError, disabled }) {
+export default function DeleteArticleDialogue({
+  id, dirId, title, updateTime, onClose, onDelete, hasError, disabled
+}) {
   const handelDelete = async () => {
-    await onDelete({ id: id })
+    await onDelete({ id: id, dirId: dirId })
   }
 
-  if (!(id && title && updateTime)) return null
+  if (!(id && dirId && title && updateTime)) return null
 
   return (
     <>
