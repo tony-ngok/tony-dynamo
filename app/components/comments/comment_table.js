@@ -13,19 +13,36 @@ export default function CommentTable({ dirId, articleId, setReadError }) {
   const [commentLk, setCommentLk] = useState(undefined)
 
   useEffect(() => {
-    async function getComments() {
-      const res_comments = await fetch(`/api/comments?articleId=${articleId}`)
-      if (res_comments.ok) {
-        const res_data = (await res_comments.json()).data
-        setComments(res_data)
-        setDisabled(false)
-      } else {
-        setReadError(1)
-      }
+    if (dirId && articleId) {
+      setComments(undefined)
+      setCommentLk(undefined)
+    }
+  }, [dirId, articleId])
+
+  useEffect(() => {
+    if (comments === undefined) {
+      getComments()
+    }
+  }, [comments])
+
+  const getComments = async () => {
+    setDisabled(true)
+
+    let fetchUrl = `/api/comments?articleId=${articleId}`
+    if (commentLk) {
+      fetchUrl += `&lastKey=${encodeURIComponent(JSON.stringify(commentLk))}`
     }
 
-    if (dirId && articleId) { getComments() }
-  }, [dirId, articleId])
+    const res = await fetch(fetchUrl)
+    if (res.ok) {
+      const res_comm = await res.json()
+      setComments(comments === undefined ? res_comm.data : [...comments, ...res_comm.data])
+      setCommentLk(res_comm.lastKey)
+      setDisabled(false)
+    } else {
+      setReadError(1)
+    }
+  }
 
   const openDelete = (id, createTime) => {
     setDeleteId(id)
@@ -83,7 +100,15 @@ export default function CommentTable({ dirId, articleId, setReadError }) {
     <>
       <CommentForm dirId={dirId} articleId={articleId} disabled={disabled} onCreate={handelComment} />
 
-      <h2>留言{comments && `（${comments.length}个）`}</h2>
+      <h2>留言表</h2>
+      <button type="button"
+        onClick={() => {
+          setComments(undefined)
+          setCommentLk(undefined)
+        }}
+        disabled={disabled}
+      >刷新</button>
+
       <table>
         <thead>
           <tr>
@@ -110,7 +135,7 @@ export default function CommentTable({ dirId, articleId, setReadError }) {
         </tbody>
       </table>
 
-      {commentLk && <button type="button">更多留言</button>}
+      {commentLk && <button type="button" onClick={getComments} disabled={disabled}>更多留言</button>}
 
       <DeleteCommentDialogue id={deleteId} createTime={deleteCreateTime}
         onClose={closeDelete} onDelete={handelDelete} disabled={disabled}

@@ -22,14 +22,7 @@ const DirSchema = new dynamoose.Schema({
   dirName: String,
   createTimestamp: Number,
   updateTimestamp: Number
-},
-  // {
-  //   timestamps: {
-  //     createdAt: { createTimestamp: Number },
-  //     updatedAt: { updateTimestamp: Number }
-  //   }
-  // }
-)
+})
 
 const DirModel = dynamoose.model("Dir", DirSchema)
 const _ = new dynamoose.Table(TableName, [DirModel])

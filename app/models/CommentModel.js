@@ -22,16 +22,7 @@ const CommentSchema = new dynamoose.Schema({
   text: String,
   createTimestamp: Number,
   updateTimestamp: Number
-},
-  // {
-  //   timestamps: {
-  //     timestamps: {
-  //       createdAt: { createTimestamp: Number },
-  //       updatedAt: { updateTimestamp: Number }
-  //     }
-  //   }
-  // }
-)
+})
 
 const CommentModel = dynamoose.model("Comment", CommentSchema)
 const _ = new dynamoose.Table(TableName, [CommentModel])

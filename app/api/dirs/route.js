@@ -1,3 +1,4 @@
+import { QUERY_LIMIT } from "@/app/models/_dynamooseConfig"
 import ArticleModel from "@/app/models/ArticleModel"
 import CommentModel from "@/app/models/CommentModel"
 import DirModel from "@/app/models/DirModel"
@@ -13,10 +14,25 @@ export async function GET(request) {
     return Response.json({ error: "Bad request" }, { status: 400 })
   }
 
+  let lastKey
   try {
-    const res = await DirModel.query().where('GSI1PK').eq('DIR').using('SortIndex').sort(sort).exec()
+    const lastKeyParam = url.searchParams.get('lastKey')
+    if (lastKeyParam) {
+      lastKey = JSON.parse(decodeURIComponent(lastKeyParam))
+      // console.log(lastKey)
+    }
+  } catch {
+    return Response.json({ error: "Bad request" }, { status: 400 })
+  }
+
+  try {
+    let query = DirModel.query().where('GSI1PK').eq('DIR').using('SortIndex').sort(sort)
+      .limit(QUERY_LIMIT)
+    if (lastKey) query = query.startAt(lastKey)
+
+    const res = await query.exec()
     // console.log(res)
-    return Response.json({ data: res }, { status: 200 })
+    return Response.json({ data: res, lastKey: res.lastKey }, { status: 200 })
   } catch (err) {
     // console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })

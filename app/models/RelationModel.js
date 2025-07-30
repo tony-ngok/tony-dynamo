@@ -21,14 +21,7 @@ const RelationSchema = new dynamoose.Schema({
   GSI1SK: String,
   createTimestamp: Number,
   updateTimestamp: Number
-},
-  // {
-  //   timestamps: {
-  //     createdAt: { createTimestamp: Number },
-  //     updatedAt: { updateTimestamp: Number }
-  //   }
-  // }
-)
+})
 
 const RelationModel = dynamoose.model("Relation", RelationSchema)
 const _ = new dynamoose.Table(TableName, [RelationModel])

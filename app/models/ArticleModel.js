@@ -24,14 +24,7 @@ const ArticleSchema = new dynamoose.Schema({
   htmlContent: String,
   createTimestamp: Number,
   updateTimestamp: Number
-},
-  // {
-  //   timestamps: {
-  //     createdAt: { createTimestamp: Number },
-  //     updatedAt: { updateTimestamp: Number }
-  //   }
-  // }
-)
+})
 
 const ArticleModel = dynamoose.model("Article", ArticleSchema)
 const _ = new dynamoose.Table(TableName, [ArticleModel])

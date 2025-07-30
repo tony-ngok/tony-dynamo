@@ -10,6 +10,7 @@ export default function DirView({ dirId }) {
   const [disabled, setDisabled] = useState(true)
   const [dirName, setDirName] = useState("")
   const [articles, setArticles] = useState(undefined)
+  const [articleLk, setArticleLk] = useState(undefined)
   const [isAsc, setIsAsc] = useState(false)
   const [readError, setReadError] = useState(0)
   const [deleteArticleId, setDeleteArticleId] = useState(null)
@@ -32,20 +33,36 @@ export default function DirView({ dirId }) {
   }, [dirId])
 
   useEffect(() => {
-    async function getArticles() {
-      setDisabled(true)
-
-      const sort = isAsc ? 'ascending' : 'descending'
-      const res_articles = await fetch(`/api/articles?dirId=${dirId}&sort=${sort}`)
-      if (res_articles.ok) {
-        setArticles((await res_articles.json()).data)
-        setDisabled(false)
-      } else {
-        setReadError(1)
-      }
+    if (!readError && dirName) {
+      setArticles(undefined)
+      setArticleLk(undefined)
     }
-    if (!readError && dirName) { getArticles() }
   }, [isAsc, dirName])
+
+  useEffect(() => {
+    if (articles === undefined) {
+      getArticles()
+    }
+  }, [articles])
+
+  const getArticles = async () => {
+    setDisabled(true)
+
+    let fetchUrl = `/api/articles?dirId=${dirId}&sort=${isAsc ? 'ascending' : 'descending'}`
+    if (articleLk) {
+      fetchUrl += `&lastKey=${encodeURIComponent(JSON.stringify(articleLk))}`
+    }
+
+    const res = await fetch(fetchUrl)
+    if (res.ok) {
+      const res_art = await res.json()
+      setArticles(articles === undefined ? res_art.data : [...articles, ...res_art.data])
+      setArticleLk(res_art.lastKey)
+      setDisabled(false)
+    } else {
+      setReadError(1)
+    }
+  }
 
   const openDeleteArticle = (articleId, articleName, articleUpdateTime) => {
     setHasDeleteError(false)
@@ -140,6 +157,8 @@ export default function DirView({ dirId }) {
               )}
             </tbody>
           </table>
+
+          {articleLk && <button type="button" onClick={getArticles} disabled={disabled}>更多</button>}
 
           <DeleteArticleDialogue id={deleteArticleId} dirId={dirId}
             title={deleteArticleTitle} updateTime={deleteArticleUpdateTime}

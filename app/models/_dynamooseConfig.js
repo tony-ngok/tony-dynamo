@@ -8,10 +8,6 @@ const ddb = new dynamoose.aws.ddb.DynamoDB({
   region: process.env.PRIVATE_AWS_REGION
 })
 dynamoose.aws.ddb.set(ddb)
-// dynamoose.Table.defaults.set({
-//   create: false,
-//   waitForActive: { enabled: false }
-// })
 
 export const TableName = 'TonyTable'
 export const QUERY_LIMIT = 2

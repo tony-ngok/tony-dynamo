@@ -10,6 +10,7 @@ import DeleteDirDialogue from "./components/dialogues/delete_dir"
 export default function App() {
   const [disabled, setDisabled] = useState(true)
   const [dirs, setDirs] = useState(undefined)
+  const [dirLk, setDirLk] = useState(undefined)
   const [hasReadError, setHasReadError] = useState(false)
   const [isAsc, setIsAsc] = useState(false)
   const [isCreateDir, setIsCreateDir] = useState(false)
@@ -20,20 +21,34 @@ export default function App() {
   const [hasWriteError, setHasWriteError] = useState(false)
 
   useEffect(() => {
-    async function getDirs() {
-      setDisabled(true)
-
-      const sort = isAsc ? 'ascending' : 'descending'
-      const res = await fetch(`/api/dirs?sort=${sort}`)
-      if (res.ok) {
-        setDirs((await res.json()).data)
-        setDisabled(false)
-      } else {
-        setHasReadError(true)
-      }
-    }
-    getDirs()
+    setDirs(undefined)
+    setDirLk(undefined)
   }, [isAsc])
+
+  useEffect(() => {
+    if (dirs === undefined) {
+      getDirs()
+    }
+  }, [dirs])
+
+  const getDirs = async () => {
+    setDisabled(true)
+
+    let fetchUrl = `/api/dirs?sort=${isAsc ? 'ascending' : 'descending'}`
+    if (dirLk) {
+      fetchUrl += `&lastKey=${encodeURIComponent(JSON.stringify(dirLk))}`
+    }
+
+    const res = await fetch(fetchUrl)
+    if (res.ok) {
+      const res_dir = await res.json()
+      setDirs(dirs === undefined ? res_dir.data : [...dirs, ...res_dir.data])
+      setDirLk(res_dir.lastKey)
+      setDisabled(false)
+    } else {
+      setHasReadError(true)
+    }
+  }
 
   const openCreateDir = () => {
     setHasWriteError(false)
@@ -182,6 +197,8 @@ export default function App() {
           )}
         </tbody>
       </table>
+
+      {dirLk && <button type="button" onClick={getDirs} disabled={disabled}>更多</button>}
 
       <CreateDirDialogue isOpen={isCreateDir} onClose={() => setIsCreateDir(false)}
         onCreate={handelCreate} hasError={hasWriteError} disabled={disabled}
