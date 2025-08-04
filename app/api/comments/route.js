@@ -2,6 +2,7 @@ import { QUERY_LIMIT } from "@/app/models/_dynamooseConfig"
 import ArticleModel from "@/app/models/ArticleModel"
 import CommentModel from "@/app/models/CommentModel"
 import RelationModel from "@/app/models/RelationModel"
+import { getKey } from "@/app/utils/db_utils"
 import { apiString, getId } from "@/app/utils/string_utils"
 import { nanoid } from "nanoid"
 
@@ -25,19 +26,16 @@ export async function GET(request) {
 
   try {
     let query = CommentModel.query().where('GSI1PK').eq(`ARTICLE#${articleId}`)
-      .using('SortIndex').sort('descending').limit(QUERY_LIMIT)
+      .using('SortIndex').sort('descending').limit(QUERY_LIMIT + 1)
     if (lastKey) query = query.startAt(lastKey)
-
     const res = await query.exec()
     // console.log(res)
-    let queryLk = res.lastKey
-    if (queryLk) {
-      const nextQuery = await CommentModel.query().where('GSI1PK').eq(`ARTICLE#${articleId}`)
-        .using('SortIndex').sort('descending').limit(QUERY_LIMIT).startAt(queryLk).exec()
-      if (!nextQuery.count) queryLk = undefined
-    }
 
-    return Response.json({ data: res, lastKey: queryLk }, { status: 200 })
+    const items = res.toJSON()
+    const data = items.slice(0, QUERY_LIMIT)
+    const queryLk = items.length > QUERY_LIMIT ? getKey(items[QUERY_LIMIT - 1]) : undefined
+
+    return Response.json({ data: data, lastKey: queryLk }, { status: 200 })
   } catch (err) {
     // console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })

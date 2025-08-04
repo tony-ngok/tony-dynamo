@@ -14,7 +14,7 @@ const usePageStoreBase = zustand.create((set) => ({
 }))
 
 export const setPage = (p, newPrevKey, newNextKey) => {
-  usePageStoreBase.setState((state) => {
+  usePageStoreBase.setState(() => {
     if (newPrevKey === undefined) p = 1
 
     let new_keys = {}

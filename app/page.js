@@ -12,7 +12,6 @@ import { setPage } from "./zustand/zustand"
 export default function App() {
   const [disabled, setDisabled] = useState(true)
   const [dirs, setDirs] = useState(undefined)
-  // const [dirLk, setDirLk] = useState(undefined)
   const [hasReadError, setHasReadError] = useState(false)
   const [isAsc, setIsAsc] = useState(false)
   const [isCreateDir, setIsCreateDir] = useState(false)
@@ -21,10 +20,6 @@ export default function App() {
   const [deleteDirId, setDeleteDirId] = useState(null)
   const [deleteDirName, setDeleteDirName] = useState("")
   const [hasWriteError, setHasWriteError] = useState(false)
-
-  // const p = usePageStore.use.page()
-  // const prevKey = usePageStore.use.prevKey()
-  // const nextKey = usePageStore.use.nextKey()
 
   useEffect(() => {
     setDirs(undefined)
@@ -207,7 +202,7 @@ export default function App() {
         </tbody>
       </table>
 
-      <Paging disabled={disabled || !(dirs && dirs.length)} turn={getDirs} />
+      {dirs !== undefined && <Paging disabled={disabled || !dirs.length} turn={getDirs} />}
 
       <CreateDirDialogue isOpen={isCreateDir} onClose={() => setIsCreateDir(false)}
         onCreate={handelCreate} hasError={hasWriteError} disabled={disabled}

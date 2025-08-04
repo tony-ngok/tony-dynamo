@@ -5,12 +5,13 @@ import { useEffect, useState } from "react"
 import { getId, toLocaleDateTime } from "../utils/string_utils"
 import ButtonLink from "./button_link"
 import DeleteArticleDialogue from "./dialogues/delete_article"
+import { setPage } from "../zustand/zustand"
+import Paging from "./paging"
 
 export default function DirView({ dirId }) {
   const [disabled, setDisabled] = useState(true)
   const [dirName, setDirName] = useState("")
   const [articles, setArticles] = useState(undefined)
-  const [articleLk, setArticleLk] = useState(undefined)
   const [isAsc, setIsAsc] = useState(false)
   const [readError, setReadError] = useState(0)
   const [deleteArticleId, setDeleteArticleId] = useState(null)
@@ -35,7 +36,6 @@ export default function DirView({ dirId }) {
   useEffect(() => {
     if (!readError && dirName) {
       setArticles(undefined)
-      setArticleLk(undefined)
     }
   }, [isAsc, dirName])
 
@@ -50,23 +50,22 @@ export default function DirView({ dirId }) {
       setIsAsc(false)
     } else {
       setArticles(undefined)
-      setArticleLk(undefined)
     }
   }
 
-  const getArticles = async () => {
+  const getArticles = async (baseKey, pp = 1) => {
     setDisabled(true)
 
-    let fetchUrl = `/api/articles?dirId=${dirId}&sort=${isAsc ? 'ascending' : 'descending'}`
-    if (articleLk) {
-      fetchUrl += `&lastKey=${encodeURIComponent(JSON.stringify(articleLk))}`
+    let fetchUrl = `/api/articles?dirId=${dirId}&sort=${isAsc ? 'ascending' : 'descending'}&p=${pp}`
+    if (baseKey) {
+      fetchUrl += `&lastKey=${encodeURIComponent(JSON.stringify(baseKey))}`
     }
 
     const res = await fetch(fetchUrl)
     if (res.ok) {
       const res_art = await res.json()
-      setArticles(articles === undefined ? res_art.data : [...articles, ...res_art.data])
-      setArticleLk(res_art.lastKey)
+      setArticles(res_art.data)
+      setPage(pp, res_art.prevKey, res_art.nextKey)
       setDisabled(false)
     } else {
       setReadError(1)
@@ -167,7 +166,7 @@ export default function DirView({ dirId }) {
             </tbody>
           </table>
 
-          {articleLk && <button type="button" onClick={getArticles} disabled={disabled}>更多</button>}
+          {articles !== undefined && <Paging disabled={disabled || !articles.length} turn={getArticles} />}
 
           <DeleteArticleDialogue id={deleteArticleId} dirId={dirId}
             title={deleteArticleTitle} updateTime={deleteArticleUpdateTime}
