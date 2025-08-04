@@ -1,11 +1,11 @@
 "use client"
 
-import { usePageStore } from "../zustand/zustand"
+import { useAppSelector } from "../paging_redux/hooks"
 
 export default function Paging({ turn, disabled }) {
-  const p = usePageStore.use.page()
-  const prevKey = usePageStore.use.prevKey()
-  const nextKey = usePageStore.use.nextKey()
+  const p = useAppSelector(state => state.paging.page)
+  const prevKey = useAppSelector(state => state.paging.prevKey)
+  const nextKey = useAppSelector(state => state.paging.nextKey)
 
   return (
     <nav>
