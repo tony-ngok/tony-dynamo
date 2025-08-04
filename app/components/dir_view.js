@@ -45,6 +45,15 @@ export default function DirView({ dirId }) {
     }
   }, [articles])
 
+  const reload = () => {
+    if (isAsc) {
+      setIsAsc(false)
+    } else {
+      setArticles(undefined)
+      setArticleLk(undefined)
+    }
+  }
+
   const getArticles = async () => {
     setDisabled(true)
 
@@ -88,10 +97,8 @@ export default function DirView({ dirId }) {
         body: JSON.stringify(data)
       })
       if (res.ok) {
-        if (deleteArticleId) {
-          setArticles(articles.filter(article => (article.pk !== `ARTICLE#${deleteArticleId}`)))
-        }
         closeDeleteArticle()
+        reload()
       } else {
         setHasDeleteError(true)
       }
@@ -122,7 +129,9 @@ export default function DirView({ dirId }) {
           <nav className="navbar">
             <ButtonLink href={`/${dirId}/new`} disabled={disabled} text={"写文章"} />
             <label>
-              <input type="checkbox" checked={isAsc} onChange={() => setIsAsc(!isAsc)} disabled={disabled} />
+              <input type="checkbox" checked={isAsc} onChange={() => setIsAsc(!isAsc)}
+                disabled={disabled || !(articles && articles.length)}
+              />
               按更新时间升序排列
             </label>
           </nav>

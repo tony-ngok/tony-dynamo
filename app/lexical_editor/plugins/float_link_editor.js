@@ -208,7 +208,7 @@ export default function FloatLinkEditorPlugin({ anchorElem = document.body }) {
 
     const node = getSelectedNode(selection)
     const linkParent = $findMatchingParent(node, $isLinkNode)
-    if (linkParent != null) {
+    if (linkParent !== null) {
       setIsLink(true)
     } else {
       setIsLink(false)

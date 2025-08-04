@@ -6,6 +6,12 @@ export function apiString(input) {
   return input.trim()
 }
 
+export function apiNatNum(input) {
+  if (!input) return 1
+  const output = parseInt(input) || 1
+  return output > 0 ? output : 1
+}
+
 export function getId(key) {
   return key.split("#")[1]
 }

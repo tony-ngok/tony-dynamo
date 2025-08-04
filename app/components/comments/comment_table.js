@@ -13,10 +13,7 @@ export default function CommentTable({ dirId, articleId, setReadError }) {
   const [commentLk, setCommentLk] = useState(undefined)
 
   useEffect(() => {
-    if (dirId && articleId) {
-      setComments(undefined)
-      setCommentLk(undefined)
-    }
+    if (dirId && articleId) { reload() }
   }, [dirId, articleId])
 
   useEffect(() => {
@@ -24,6 +21,11 @@ export default function CommentTable({ dirId, articleId, setReadError }) {
       getComments()
     }
   }, [comments])
+
+  const reload = () => {
+    setComments(undefined)
+    setCommentLk(undefined)
+  }
 
   const getComments = async () => {
     setDisabled(true)
@@ -64,8 +66,7 @@ export default function CommentTable({ dirId, articleId, setReadError }) {
         body: JSON.stringify(data)
       })
       if (res.ok) {
-        const newComm = (await res.json()).data
-        setComments([newComm, ...comments])
+        reload()
       } else {
         alert("发表留言出错，请再试")
       }
@@ -84,10 +85,8 @@ export default function CommentTable({ dirId, articleId, setReadError }) {
         body: JSON.stringify(data)
       })
       if (res.ok) {
-        if (deleteId) {
-          setComments(comments.filter(comm => (comm.pk !== `COMMENT#${deleteId}`)))
-          closeDelete()
-        }
+        closeDelete()
+        reload()
       } else {
         alert("删除留言出错，请再试")
       }
@@ -107,7 +106,7 @@ export default function CommentTable({ dirId, articleId, setReadError }) {
           setCommentLk(undefined)
         }}
         disabled={disabled}
-      >刷新</button>
+      >刷新留言</button>
 
       <table>
         <thead>

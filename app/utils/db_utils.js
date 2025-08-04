@@ -1,5 +1,30 @@
 import { QUERY_LIMIT } from "../models/_dynamooseConfig"
 
+export function getKey(object) {
+  if (object) {
+    const { pk, sk, GSI1PK, GSI1SK, ..._ } = object
+    return { pk, sk, GSI1PK, GSI1SK }
+  }
+}
+
+export async function pagingQuery(baseQuery, startKey, limit, sort) {
+  let q = baseQuery.sort(sort).limit(limit + 1)
+  if (startKey) q = q.startAt(startKey)
+
+  const res = await q.exec()
+  const items = res.toJSON()
+  const data = items.slice(0, limit)
+
+  let nextKey
+  let nextStart
+  if (items.length > limit) {
+    nextKey = getKey(items[limit - 1])
+    nextStart = getKey(items[limit])
+  }
+
+  return { data: data, nextKey: nextKey, nextStart: nextStart }
+}
+
 export async function gsiQueryAll(model, gsi1pk, gsi1sk, eq = true) {
   let queryAll = []
 

@@ -81,7 +81,7 @@ export function getDOMRangeRect(nativeSelection, rootElement) {
   let rect
   if (nativeSelection.anchorNode === rootElement) {
     let inner = rootElement
-    while (inner.firstElementChild != null) {
+    while (inner.firstElementChild !== null) {
       inner = inner.firstElementChild
     }
     rect = inner.getBoundingClientRect()

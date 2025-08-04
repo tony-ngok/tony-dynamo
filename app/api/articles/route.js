@@ -33,7 +33,14 @@ export async function GET(request) {
 
     const res = await query.exec()
     // console.log(res)
-    return Response.json({ data: res, lastKey: res.lastKey }, { status: 200 })
+    let queryLk = res.lastKey
+    if (queryLk) {
+      const nextQuery = await ArticleModel.query().where('GSI1PK').eq(`DIR#${dirId}`)
+        .using('SortIndex').sort(sort).limit(QUERY_LIMIT).startAt(queryLk).exec()
+      if (!nextQuery.count) queryLk = undefined
+    }
+
+    return Response.json({ data: res, lastKey: queryLk }, { status: 200 })
   } catch (err) {
     // console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
@@ -158,7 +165,7 @@ export async function DELETE(request) {
     const comms_rels_query = await gsiQueryAll(RelationModel, 'RELATION',
       `DIR#${dirId}#${articlePk}#COMMENT`
     )
-    console.log(comms_rels_query)
+    // console.log(comms_rels_query)
 
     // 清除相关的留言
     let comms_pksks = []
@@ -167,7 +174,7 @@ export async function DELETE(request) {
         comms_pksks.push({ pk: rel.pk, sk: rel.pk })
       }
     }
-    console.log(comms_pksks)
+    // console.log(comms_pksks)
 
     await sliceBatchDelete(RelationModel, comms_rels_query)
     await sliceBatchDelete(CommentModel, comms_pksks, false)

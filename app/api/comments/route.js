@@ -30,7 +30,14 @@ export async function GET(request) {
 
     const res = await query.exec()
     // console.log(res)
-    return Response.json({ data: res, lastKey: res.lastKey }, { status: 200 })
+    let queryLk = res.lastKey
+    if (queryLk) {
+      const nextQuery = await CommentModel.query().where('GSI1PK').eq(`ARTICLE#${articleId}`)
+        .using('SortIndex').sort('descending').limit(QUERY_LIMIT).startAt(queryLk).exec()
+      if (!nextQuery.count) queryLk = undefined
+    }
+
+    return Response.json({ data: res, lastKey: queryLk }, { status: 200 })
   } catch (err) {
     // console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })

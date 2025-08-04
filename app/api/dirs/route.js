@@ -3,8 +3,8 @@ import ArticleModel from "@/app/models/ArticleModel"
 import CommentModel from "@/app/models/CommentModel"
 import DirModel from "@/app/models/DirModel"
 import RelationModel from "@/app/models/RelationModel"
-import { gsiQueryAll, sliceBatchDelete } from "@/app/utils/db_utils"
-import { apiString } from "@/app/utils/string_utils"
+import { getKey, gsiQueryAll, pagingQuery, sliceBatchDelete } from "@/app/utils/db_utils"
+import { apiNatNum, apiString } from "@/app/utils/string_utils"
 import { nanoid } from "nanoid"
 
 export async function GET(request) {
@@ -26,13 +26,30 @@ export async function GET(request) {
   }
 
   try {
-    let query = DirModel.query().where('GSI1PK').eq('DIR').using('SortIndex').sort(sort)
-      .limit(QUERY_LIMIT)
-    if (lastKey) query = query.startAt(lastKey)
+    const p = apiNatNum(url.searchParams.get('p'))
+    const baseQuery = DirModel.query().where('GSI1PK').eq('DIR').using('SortIndex')
+    let res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT, sort)
 
-    const res = await query.exec()
-    // console.log(res)
-    return Response.json({ data: res, lastKey: res.lastKey }, { status: 200 })
+    const unsort = sort === 'ascending' ? 'descending' : 'ascending'
+    let prevKey
+    if (p === 2) {
+      prevKey = null // null 专指去第一页不需要查询起始键（从头开始）
+    } else if (p > 2) {
+      if (res.data.length) {
+        const firstKey = getKey(res.data[0])
+        const prev_json = await pagingQuery(baseQuery, firstKey, QUERY_LIMIT, unsort)
+        prevKey = prev_json.nextStart || null
+      } else {
+        prevKey = null
+      }
+    }
+
+    // console.log({ data: res.data, nextKey: res.nextKey, prevKey: prevKey })
+    return Response.json({
+      data: res.data,
+      nextKey: res.nextKey,
+      prevKey: prevKey
+    }, { status: 200 })
   } catch (err) {
     // console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })

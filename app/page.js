@@ -6,11 +6,13 @@ import { getId, toLocaleDateTime } from "./utils/string_utils"
 import CreateDirDialogue from "./components/dialogues/create_dir"
 import UpdateDirDialogue from "./components/dialogues/update_dir"
 import DeleteDirDialogue from "./components/dialogues/delete_dir"
+import Paging from "./components/paging"
+import { setPage } from "./zustand/zustand"
 
 export default function App() {
   const [disabled, setDisabled] = useState(true)
   const [dirs, setDirs] = useState(undefined)
-  const [dirLk, setDirLk] = useState(undefined)
+  // const [dirLk, setDirLk] = useState(undefined)
   const [hasReadError, setHasReadError] = useState(false)
   const [isAsc, setIsAsc] = useState(false)
   const [isCreateDir, setIsCreateDir] = useState(false)
@@ -20,9 +22,12 @@ export default function App() {
   const [deleteDirName, setDeleteDirName] = useState("")
   const [hasWriteError, setHasWriteError] = useState(false)
 
+  // const p = usePageStore.use.page()
+  // const prevKey = usePageStore.use.prevKey()
+  // const nextKey = usePageStore.use.nextKey()
+
   useEffect(() => {
     setDirs(undefined)
-    setDirLk(undefined)
   }, [isAsc])
 
   useEffect(() => {
@@ -31,19 +36,27 @@ export default function App() {
     }
   }, [dirs])
 
-  const getDirs = async () => {
+  const reload = () => {
+    if (isAsc) {
+      setIsAsc(false)
+    } else {
+      setDirs(undefined)
+    }
+  }
+
+  const getDirs = async (baseKey, pp = 1) => {
     setDisabled(true)
 
-    let fetchUrl = `/api/dirs?sort=${isAsc ? 'ascending' : 'descending'}`
-    if (dirLk) {
-      fetchUrl += `&lastKey=${encodeURIComponent(JSON.stringify(dirLk))}`
+    let fetchUrl = `/api/dirs?sort=${isAsc ? 'ascending' : 'descending'}&p=${pp}`
+    if (baseKey) {
+      fetchUrl += `&lastKey=${encodeURIComponent(JSON.stringify(baseKey))}`
     }
 
     const res = await fetch(fetchUrl)
     if (res.ok) {
       const res_dir = await res.json()
-      setDirs(dirs === undefined ? res_dir.data : [...dirs, ...res_dir.data])
-      setDirLk(res_dir.lastKey)
+      setDirs(res_dir.data)
+      setPage(pp, res_dir.prevKey, res_dir.nextKey)
       setDisabled(false)
     } else {
       setHasReadError(true)
@@ -88,9 +101,8 @@ export default function App() {
         body: JSON.stringify(data)
       })
       if (res.ok) {
-        const newDir = (await res.json()).data
-        setDirs([newDir, ...dirs])
         setIsCreateDir(false)
+        reload()
       } else {
         setHasWriteError(true)
       }
@@ -110,11 +122,8 @@ export default function App() {
         body: JSON.stringify(data)
       })
       if (res.ok) {
-        const newDir = (await res.json()).data
-        if (newDir) {
-          setDirs(dirs.map(dir => (dir.pk === newDir.pk ? newDir : dir)))
-        }
         closeUpdateDir()
+        reload()
       } else {
         setHasWriteError(true)
       }
@@ -134,10 +143,8 @@ export default function App() {
         body: JSON.stringify(data)
       })
       if (res.ok) {
-        if (deleteDirId) {
-          setDirs(dirs.filter(dir => (dir.pk !== `DIR#${deleteDirId}`)))
-        }
         closeDeleteDir()
+        reload()
       } else {
         setHasWriteError(true)
       }
@@ -160,7 +167,9 @@ export default function App() {
       <nav className="navbar">
         <button type="button" onClick={openCreateDir} disabled={disabled}>新建目录</button>
         <label>
-          <input type="checkbox" checked={isAsc} onChange={() => setIsAsc(!isAsc)} disabled={disabled} />
+          <input type="checkbox" checked={isAsc} onChange={() => setIsAsc(!isAsc)}
+            disabled={disabled || !(dirs && dirs.length)}
+          />
           按更新时间升序排列
         </label>
       </nav>
@@ -198,7 +207,7 @@ export default function App() {
         </tbody>
       </table>
 
-      {dirLk && <button type="button" onClick={getDirs} disabled={disabled}>更多</button>}
+      <Paging disabled={disabled || !(dirs && dirs.length)} turn={getDirs} />
 
       <CreateDirDialogue isOpen={isCreateDir} onClose={() => setIsCreateDir(false)}
         onCreate={handelCreate} hasError={hasWriteError} disabled={disabled}
