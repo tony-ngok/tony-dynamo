@@ -7,9 +7,12 @@ import CreateDirDialogue from "./components/dialogues/create_dir"
 import UpdateDirDialogue from "./components/dialogues/update_dir"
 import DeleteDirDialogue from "./components/dialogues/delete_dir"
 import Paging from "./components/paging"
-import { setPage } from "./zustand/zustand"
+import { setPage } from "./paging_redux/slice"
+import { useAppDispatch } from "./paging_redux/hooks"
 
 export default function App() {
+  const dispatch = useAppDispatch()
+
   const [disabled, setDisabled] = useState(true)
   const [dirs, setDirs] = useState(undefined)
   const [hasReadError, setHasReadError] = useState(false)
@@ -51,7 +54,7 @@ export default function App() {
     if (res.ok) {
       const res_dir = await res.json()
       setDirs(res_dir.data)
-      setPage(pp, res_dir.prevKey, res_dir.nextKey)
+      dispatch(setPage({ p: pp, newPrevKey: res_dir.prevKey, newNextKey: res_dir.nextKey }))
       setDisabled(false)
     } else {
       setHasReadError(true)
@@ -202,7 +205,7 @@ export default function App() {
         </tbody>
       </table>
 
-      {dirs !== undefined && <Paging disabled={disabled || !dirs.length} turn={getDirs} />}
+      {dirs && Boolean(dirs.length) && <Paging disabled={disabled} turn={getDirs} />}
 
       <CreateDirDialogue isOpen={isCreateDir} onClose={() => setIsCreateDir(false)}
         onCreate={handelCreate} hasError={hasWriteError} disabled={disabled}

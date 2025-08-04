@@ -5,10 +5,13 @@ import { useEffect, useState } from "react"
 import { getId, toLocaleDateTime } from "../utils/string_utils"
 import ButtonLink from "./button_link"
 import DeleteArticleDialogue from "./dialogues/delete_article"
-import { setPage } from "../zustand/zustand"
 import Paging from "./paging"
+import { setPage } from "../paging_redux/slice"
+import { useAppDispatch } from "../paging_redux/hooks"
 
 export default function DirView({ dirId }) {
+  const dispatch = useAppDispatch()
+
   const [disabled, setDisabled] = useState(true)
   const [dirName, setDirName] = useState("")
   const [articles, setArticles] = useState(undefined)
@@ -65,7 +68,7 @@ export default function DirView({ dirId }) {
     if (res.ok) {
       const res_art = await res.json()
       setArticles(res_art.data)
-      setPage(pp, res_art.prevKey, res_art.nextKey)
+      dispatch(setPage({ p: pp, newPrevKey: res_art.prevKey, newNextKey: res_art.nextKey }))
       setDisabled(false)
     } else {
       setReadError(1)
@@ -166,7 +169,9 @@ export default function DirView({ dirId }) {
             </tbody>
           </table>
 
-          {articles !== undefined && <Paging disabled={disabled || !articles.length} turn={getArticles} />}
+          {articles && Boolean(articles.length) &&
+            <Paging disabled={disabled} turn={getArticles} />
+          }
 
           <DeleteArticleDialogue id={deleteArticleId} dirId={dirId}
             title={deleteArticleTitle} updateTime={deleteArticleUpdateTime}
