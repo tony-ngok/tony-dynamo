@@ -27,8 +27,10 @@ export async function GET(request) {
 
   try {
     const p = apiNatNum(url.searchParams.get('p'))
+    const total = await gsiQueryAll(DirModel, 'DIR', undefined, true, true)
+
     const baseQuery = DirModel.query().where('GSI1PK').eq('DIR').using('SortIndex')
-    let res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT, sort)
+    const res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT, sort)
 
     const unsort = sort === 'ascending' ? 'descending' : 'ascending'
     let prevKey
@@ -47,6 +49,7 @@ export async function GET(request) {
     // console.log({ data: res.data, nextKey: res.nextKey, prevKey: prevKey })
     return Response.json({
       data: res.data,
+      totalPages: Math.ceil(total / QUERY_LIMIT),
       nextKey: res.nextKey,
       prevKey: prevKey
     }, { status: 200 })

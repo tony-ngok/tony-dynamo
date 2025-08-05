@@ -4,6 +4,7 @@ import { useAppSelector } from "../paging_redux/hooks"
 
 export default function Paging({ turn, disabled }) {
   const p = useAppSelector(state => state.paging.page)
+  const totalP = useAppSelector(state => state.paging.totalPages)
   const prevKey = useAppSelector(state => state.paging.prevKey)
   const nextKey = useAppSelector(state => state.paging.nextKey)
 
@@ -21,7 +22,7 @@ export default function Paging({ turn, disabled }) {
           {p + 1}
         </button>
       }
-      <span>頁</span>
+      <span>頁，共{totalP}頁</span>
     </nav>
   )
 }

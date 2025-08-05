@@ -54,7 +54,14 @@ export default function App() {
     if (res.ok) {
       const res_dir = await res.json()
       setDirs(res_dir.data)
-      dispatch(setPage({ p: pp, newPrevKey: res_dir.prevKey, newNextKey: res_dir.nextKey }))
+
+      dispatch(setPage({
+        p: pp,
+        newTotalP: res_dir.totalPages,
+        newPrevKey: res_dir.prevKey,
+        newNextKey: res_dir.nextKey
+      }))
+
       setDisabled(false)
     } else {
       setHasReadError(true)

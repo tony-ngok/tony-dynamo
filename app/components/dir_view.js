@@ -68,7 +68,14 @@ export default function DirView({ dirId }) {
     if (res.ok) {
       const res_art = await res.json()
       setArticles(res_art.data)
-      dispatch(setPage({ p: pp, newPrevKey: res_art.prevKey, newNextKey: res_art.nextKey }))
+
+      dispatch(setPage({
+        p: pp,
+        newTotalP: res_art.totalPages,
+        newPrevKey: res_art.prevKey,
+        newNextKey: res_art.nextKey
+      }))
+
       setDisabled(false)
     } else {
       setReadError(1)
