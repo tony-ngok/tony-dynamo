@@ -110,14 +110,14 @@ export async function GET(request) {
       }
     }
 
-    console.log({
-      data: res?.data.slice(0, QUERY_LIMIT) || [], totalPages: totalPages, keys: keys
-    })
+    // console.log({
+    //   data: res?.data.slice(0, QUERY_LIMIT) || [], totalPages: totalPages, keys: keys
+    // })
     return Response.json({
       data: res?.data.slice(0, QUERY_LIMIT) || [], totalPages: totalPages, keys: keys
     }, { status: 200 })
   } catch (err) {
-    console.log(err)
+    // console.log(err)
     return Response.json({ error: err.toString() }, { status: 500 })
   }
 }
