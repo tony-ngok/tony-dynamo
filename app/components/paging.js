@@ -9,7 +9,7 @@ export default function Paging({ turn, disabled }) {
 
   let pages = Object.keys(keys).filter(i => keys[i] !== undefined).map(i => parseInt(i))
   pages.push(p)
-  pages = pages.sort()
+  pages = pages.sort((a, b) => a - b)
 
   return (
     <nav>
