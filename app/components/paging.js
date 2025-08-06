@@ -5,24 +5,31 @@ import { useAppSelector } from "../paging_redux/hooks"
 export default function Paging({ turn, disabled }) {
   const p = useAppSelector(state => state.paging.page)
   const totalP = useAppSelector(state => state.paging.totalPages)
-  const prevKey = useAppSelector(state => state.paging.prevKey)
-  const nextKey = useAppSelector(state => state.paging.nextKey)
+  const keys = useAppSelector(state => state.paging.keys)
+
+  let pages = Object.keys(keys).filter(i => keys[i] !== undefined).map(i => parseInt(i))
+  pages.push(p)
+  pages = pages.sort()
 
   return (
     <nav>
+      <button type="button" disabled={disabled || p === 1}
+        onClick={() => turn(keys[p - 1], p - 1)}
+      >
+        &larr;
+      </button>
       <span>第</span>
-      {prevKey !== undefined && p > 1 &&
-        <button type="button" disabled={disabled} onClick={() => turn(prevKey, p - 1)}>
-          {p - 1}
+      {pages && pages.map((i) => i === p ? <span key={`p${p}`}><strong>{p}</strong></span> : (
+        <button key={`p${i}`} type="button" disabled={disabled} onClick={() => turn(keys[i], i)}>
+          {i}
         </button>
-      }
-      <span><strong>{p}</strong></span>
-      {nextKey &&
-        <button type="button" disabled={disabled} onClick={() => turn(nextKey, p + 1)}>
-          {p + 1}
-        </button>
-      }
+      ))}
       <span>頁，共{totalP}頁</span>
+      <button type="button" disabled={disabled || p === totalP}
+        onClick={() => turn(keys[p + 1], p + 1)}
+      >
+        &rarr;
+      </button>
     </nav>
   )
 }

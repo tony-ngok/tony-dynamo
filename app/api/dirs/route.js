@@ -26,32 +26,94 @@ export async function GET(request) {
   }
 
   try {
-    const p = apiNatNum(url.searchParams.get('p'))
+    let p = apiNatNum(url.searchParams.get('p'))
+    if (p === 1 && lastKey) { // 第一页查询不应有索引键
+      return Response.json({ error: "Bad request" }, { status: 400 })
+    } else if (p !== 1 && !lastKey) {
+      p = 1
+    }
+
     const total = await gsiQueryAll(DirModel, 'DIR', undefined, true, true)
+    const totalPages = Math.ceil(total / QUERY_LIMIT)
+    if (p > totalPages) { // 非法状态：翻过页了
+      return Response.json({ error: "Page not found" }, { status: 404 })
+    }
 
     const baseQuery = DirModel.query().where('GSI1PK').eq('DIR').using('SortIndex')
-    const res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT, sort)
-
+    let res // 向后查询
+    let firstKey
+    let res1 // 向前查询
     const unsort = sort === 'ascending' ? 'descending' : 'ascending'
-    let prevKey
-    if (p === 2) {
-      prevKey = null // null 专指去第一页不需要查询起始键（从头开始）
-    } else if (p > 2) {
-      if (res.data.length) {
-        const firstKey = getKey(res.data[0])
-        const prev_json = await pagingQuery(baseQuery, firstKey, QUERY_LIMIT, unsort)
-        prevKey = prev_json.nextStart || null
-      } else {
-        prevKey = null
+    let keys // 可以翻到的页数
+
+    if (p === 1) { // 第一頁：需要能够看到第2、3、4页
+      res = await pagingQuery(baseQuery, null, QUERY_LIMIT * 3, sort)
+      keys = {
+        2: totalPages >= 2 ? getKey(res.data[QUERY_LIMIT - 1]) : undefined,
+        3: totalPages >= 3 ? getKey(res.data[QUERY_LIMIT * 2 - 1]) : undefined,
+        4: res.nextKey
+      }
+    } else if (p === 2) {
+      res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT * 2, sort)
+
+      // 此处 null 专指第一页不需要查询起始键（即强行回到第一页）
+      keys = {
+        1: null,
+        3: totalPages >= 3 ? getKey(res.data[QUERY_LIMIT - 1]) : undefined,
+        4: res.nextKey
+      }
+    } else if (p === 3 && totalPages <= 4) { // 第三页：总页数为3或4时为第三个按纽
+      res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT, sort)
+      res1 = await pagingQuery(baseQuery, null, QUERY_LIMIT, sort)
+      keys = { 1: null, 2: res1.nextKey, 4: res.nextKey }
+    } else {
+      if (p === totalPages) { // 最后一页：第四个按纽
+        res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT, sort)
+        if (res.data.length) {
+          firstKey = getKey(res.data[0])
+          res1 = await pagingQuery(baseQuery, firstKey, QUERY_LIMIT * 3, unsort)
+
+          keys = {}
+          keys[p - 3] = res1.nextStart || null
+          keys[p - 2] = getKey(res1.data[QUERY_LIMIT * 2]) || null
+          keys[p - 1] = getKey(res1.data[QUERY_LIMIT]) || null
+        } else {
+          return Response.json({ error: "Page not found" }, { status: 404 })
+        }
+      } else if (p === totalPages - 1) { // 倒数第二页：第三个按纽
+        res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT, sort)
+        if (res.data.length) {
+          firstKey = getKey(res.data[0])
+          res1 = await pagingQuery(baseQuery, firstKey, QUERY_LIMIT * 2, unsort)
+
+          keys = {}
+          keys[p - 2] = res1.nextStart || null
+          keys[p - 1] = getKey(res1.data[QUERY_LIMIT]) || null
+          keys[p + 1] = res.nextKey
+        } else {
+          return Response.json({ error: "Page not found" }, { status: 404 })
+        }
+      } else { // 第二个按钮
+        res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT * 2, sort)
+        if (res.data.length) {
+          firstKey = getKey(res.data[0])
+          res1 = await pagingQuery(baseQuery, firstKey, QUERY_LIMIT, unsort)
+
+          keys = {}
+          keys[p - 1] = res1.nextStart || null
+          keys[p + 1] = getKey(res.data[QUERY_LIMIT - 1])
+          keys[p + 2] = res.nextKey
+        } else {
+          return Response.json({ error: "Page not found" }, { status: 404 })
+        }
       }
     }
 
-    // console.log({ data: res.data, nextKey: res.nextKey, prevKey: prevKey })
+    // console.log({
+    //   data: res?.data.slice(0, QUERY_LIMIT) || [], totalPages: totalPages, keys: keys
+    // })
     return Response.json({
-      data: res.data,
-      totalPages: Math.ceil(total / QUERY_LIMIT),
-      nextKey: res.nextKey,
-      prevKey: prevKey
+      data: res?.data.slice(0, QUERY_LIMIT) || [], totalPages: totalPages, keys: keys
     }, { status: 200 })
   } catch (err) {
     // console.log(err)

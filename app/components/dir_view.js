@@ -58,6 +58,7 @@ export default function DirView({ dirId }) {
 
   const getArticles = async (baseKey, pp = 1) => {
     setDisabled(true)
+    if (!baseKey && pp !== 1) pp = 1
 
     let fetchUrl = `/api/articles?dirId=${dirId}&sort=${isAsc ? 'ascending' : 'descending'}&p=${pp}`
     if (baseKey) {
@@ -72,8 +73,7 @@ export default function DirView({ dirId }) {
       dispatch(setPage({
         p: pp,
         newTotalP: res_art.totalPages,
-        newPrevKey: res_art.prevKey,
-        newNextKey: res_art.nextKey
+        newKeys: res_art.keys
       }))
 
       setDisabled(false)

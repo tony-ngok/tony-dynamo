@@ -1,5 +1,3 @@
-import { QUERY_LIMIT } from "../models/_dynamooseConfig"
-
 export function getKey(object) {
   if (object) {
     const { pk, sk, GSI1PK, GSI1SK, ..._ } = object
@@ -8,10 +6,7 @@ export function getKey(object) {
 }
 
 export async function pagingQuery(baseQuery, startKey, limit, sort) {
-  let q = baseQuery.sort(sort).limit(limit + 1)
-  if (startKey) q = q.startAt(startKey)
-
-  const res = await q.exec()
+  const res = await baseQuery.sort(sort).limit(limit + 1).startAt(startKey).exec()
   const items = res.toJSON()
   const data = items.slice(0, limit)
 

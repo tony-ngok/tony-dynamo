@@ -44,6 +44,7 @@ export default function App() {
 
   const getDirs = async (baseKey, pp = 1) => {
     setDisabled(true)
+    if (!baseKey && pp !== 1) pp = 1
 
     let fetchUrl = `/api/dirs?sort=${isAsc ? 'ascending' : 'descending'}&p=${pp}`
     if (baseKey) {
@@ -58,8 +59,7 @@ export default function App() {
       dispatch(setPage({
         p: pp,
         newTotalP: res_dir.totalPages,
-        newPrevKey: res_dir.prevKey,
-        newNextKey: res_dir.nextKey
+        newKeys: res_dir.keys
       }))
 
       setDisabled(false)
