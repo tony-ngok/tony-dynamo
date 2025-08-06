@@ -35,7 +35,7 @@ export async function GET(request) {
 
     const total = await gsiQueryAll(DirModel, 'DIR', undefined, true, true)
     const totalPages = Math.ceil(total / QUERY_LIMIT)
-    if (p > totalPages) { // 非法状态：翻过页了
+    if (totalPages > 0 && p > totalPages) { // 非法状态：翻过页了
       return Response.json({ error: "Page not found" }, { status: 404 })
     }
 
