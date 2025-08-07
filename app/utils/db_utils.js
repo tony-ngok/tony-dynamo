@@ -23,6 +23,7 @@ export async function pagingQuery(baseQuery, startKey, limit, sort) {
 export async function gsiQueryAll(model, gsi1pk, gsi1sk, eq = true, count = false) {
   let queryAll = []
   let queryAllCount = 0
+  let totalPages = 0
 
   let query = model.query().where('GSI1PK').eq(gsi1pk)
   if (gsi1sk) {
@@ -32,22 +33,27 @@ export async function gsiQueryAll(model, gsi1pk, gsi1sk, eq = true, count = fals
   if (count) { query = query.count() }
   query = await query.exec()
 
-  if (query.count) {
-    while (true) {
-      let lastKey = query.lastKey
+  let lastKey
+  while (query.count) {
+    lastKey = query.lastKey
+    console.log(query)
 
-      if (count) {
-        queryAllCount += query.count
-      } else {
-        queryAll = [...queryAll, ...query]
-      }
-      if (!lastKey) break
-
-      query = model.query().where('GSI1PK').eq(gsi1pk).where('GSI1SK')
-      query = (eq ? query.eq(gsi1sk) : query.beginsWith(gsi1sk)).startAt(lastKey)
-      if (count) { query = query.count() }
-      query = await query.exec()
+    if (count) {
+      queryAllCount += query.count
+      if (query.count) totalPages += 1
+    } else {
+      queryAll = [...queryAll, ...query]
     }
+    if (!lastKey) break
+
+    query = model.query().where('GSI1PK').eq(gsi1pk)
+    if (gsi1sk) {
+      query = query.where('GSI1SK')
+      query = eq ? query.eq(gsi1sk) : query.beginsWith(gsi1sk)
+    }
+    query = query.startAt(lastKey)
+    if (count) { query = query.count() }
+    query = await query.exec()
   }
 
   return count ? queryAllCount : queryAll
@@ -72,7 +78,7 @@ export async function sliceBatchDelete(model, queryItems, map = true) {
         err = true
       }
     } else {
-      const total = Math.ceil(query_pksks.count / 25)
+      const total = Math.ceil(query_pksks.length / 25)
       for (let i = 0; i < total; i++) {
         const slice = query_pksks.slice(i * 25, (i + 1) * 25)
         const batch_del = await model.batchDelete(slice)
