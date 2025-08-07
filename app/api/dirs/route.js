@@ -41,22 +41,24 @@ export async function GET(request) {
       return Response.json({ error: "Page not found" }, { status: 404 })
     }
 
+    const cols = ['dirName', 'updateTimestamp']
     const baseQuery = DirModel.query().where('GSI1PK').eq('DIR').using('SortIndex')
+    const unsort = sort === 'ascending' ? 'descending' : 'ascending'
+
     let res // 向后查询
     let firstKey
     let res1 // 向前查询
-    const unsort = sort === 'ascending' ? 'descending' : 'ascending'
     let keys // 可以翻到的页数
 
     if (p === 1) { // 第一頁：需要能够看到第2、3、4页
-      res = await pagingQuery(baseQuery, null, QUERY_LIMIT * 3, sort)
+      res = await pagingQuery(baseQuery, null, QUERY_LIMIT * 3, sort, cols)
       keys = {
         2: totalPages >= 2 ? getKey(res.data[QUERY_LIMIT - 1]) : undefined,
         3: totalPages >= 3 ? getKey(res.data[QUERY_LIMIT * 2 - 1]) : undefined,
         4: res.nextKey
       }
     } else if (p === 2) {
-      res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT * 2, sort)
+      res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT * 2, sort, cols)
 
       // 此处 null 专指第一页不需要查询起始键（即强行回到第一页）
       keys = {
@@ -65,15 +67,15 @@ export async function GET(request) {
         4: res.nextKey
       }
     } else if (p === 3 && totalPages <= 4) { // 第三页：总页数为3或4时为第三个按纽
-      res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT, sort)
-      res1 = await pagingQuery(baseQuery, null, QUERY_LIMIT, sort)
+      res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT, sort, cols)
+      res1 = await pagingQuery(baseQuery, null, QUERY_LIMIT, sort, cols)
       keys = { 1: null, 2: res1.nextKey, 4: res.nextKey }
     } else {
       if (p === totalPages) { // 最后一页：第四个按纽
-        res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT, sort)
+        res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT, sort, cols)
         if (res.data.length) {
           firstKey = getKey(res.data[0])
-          res1 = await pagingQuery(baseQuery, firstKey, QUERY_LIMIT * 3, unsort)
+          res1 = await pagingQuery(baseQuery, firstKey, QUERY_LIMIT * 3, unsort, cols)
 
           keys = {}
           keys[p - 3] = res1.nextStart || null
@@ -83,10 +85,10 @@ export async function GET(request) {
           return Response.json({ error: "Page not found" }, { status: 404 })
         }
       } else if (p === totalPages - 1) { // 倒数第二页：第三个按纽
-        res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT, sort)
+        res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT, sort, cols)
         if (res.data.length) {
           firstKey = getKey(res.data[0])
-          res1 = await pagingQuery(baseQuery, firstKey, QUERY_LIMIT * 2, unsort)
+          res1 = await pagingQuery(baseQuery, firstKey, QUERY_LIMIT * 2, unsort, cols)
 
           keys = {}
           keys[p - 2] = res1.nextStart || null
@@ -96,10 +98,10 @@ export async function GET(request) {
           return Response.json({ error: "Page not found" }, { status: 404 })
         }
       } else { // 第二个按钮
-        res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT * 2, sort)
+        res = await pagingQuery(baseQuery, lastKey, QUERY_LIMIT * 2, sort, cols)
         if (res.data.length) {
           firstKey = getKey(res.data[0])
-          res1 = await pagingQuery(baseQuery, firstKey, QUERY_LIMIT, unsort)
+          res1 = await pagingQuery(baseQuery, firstKey, QUERY_LIMIT, unsort, cols)
 
           keys = {}
           keys[p - 1] = res1.nextStart || null

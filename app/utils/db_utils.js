@@ -5,7 +5,10 @@ export function getKey(object) {
   }
 }
 
-export async function pagingQuery(baseQuery, startKey, limit, sort) {
+export async function pagingQuery(baseQuery, startKey, limit, sort, cols) {
+  let attribs
+  if (cols) attribs = ['pk', 'sk', 'GSI1PK', 'GSI1SK', ...cols]
+
   const res = await baseQuery.sort(sort).limit(limit + 1).startAt(startKey).exec()
   const items = res.toJSON()
   const data = items.slice(0, limit)
